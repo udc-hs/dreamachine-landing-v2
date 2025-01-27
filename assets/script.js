@@ -7,23 +7,35 @@ document.addEventListener("DOMContentLoaded", function () {
   let playingNormally = true; // Tracks if the video is playing at normal speed
   let scrollVelocity = 0; // Stores smoothed scroll speed
   let reverseMode = false; // Tracks if video is reversing
+  let userInteracted = false; // Detects if the user has interacted
 
   function startVideoPlayback() {
-    video.muted = true; // Ensure it's muted to allow autoplay
-    video.play().catch(error => console.error("Autoplay blocked:", error)); // Catch autoplay errors
+    if (!userInteracted) return; // Ensure playback only starts after interaction
+
+    video.muted = true; // Ensure muted for autoplay
+    if (video.paused) {
+      video.play().catch(error => console.error("Autoplay blocked:", error));
+    }
   }
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
-    startVideoPlayback();
   });
 
-  // Force play on user interaction (click or scroll)
-  document.addEventListener("click", startVideoPlayback);
-  document.addEventListener("scroll", startVideoPlayback);
+  // Start video after user interacts (click, scroll, touch)
+  function handleUserInteraction() {
+    userInteracted = true;
+    startVideoPlayback();
+  }
+  
+  document.addEventListener("click", handleUserInteraction);
+  document.addEventListener("scroll", handleUserInteraction);
+  document.addEventListener("touchstart", handleUserInteraction);
 
   document.addEventListener("scroll", () => {
-    const scrollDelta = window.scrollY - lastScrollY; // Change in scroll position
+    if (!userInteracted) return;
+
+    const scrollDelta = window.scrollY - lastScrollY;
     lastScrollY = window.scrollY;
 
     if (scrollDelta === 0) {
@@ -35,14 +47,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // If scrolling UP, slow down first before reversing
     if (scrollVelocity < -0.5) {
-      video.pause();
       reverseMode = true;
       video.playbackRate = 1; // Reset rate to normal before reversing
 
       // Create a smooth reverse effect
       let reverseInterval = setInterval(() => {
         if (video.currentTime > 0.1) {
-          video.currentTime -= 0.05; // Move backwards in small steps
+          video.currentTime -= 0.05;
         } else {
           video.currentTime = maxTime - 0.1; // Loop back to end if at start
         }
@@ -52,8 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
       setTimeout(() => {
         clearInterval(reverseInterval);
         reverseMode = false;
-        video.play(); // Resume normal playback
-      }, 1500); // Adjust delay to match user scroll speed
+        startVideoPlayback(); // Resume normal playback
+      }, 1500);
     } else {
       // Forward playback with smooth speed adjustments
       video.playbackRate = Math.max(0.5, Math.min(4, 1 + scrollVelocity));
@@ -77,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (video.currentTime >= maxTime - 0.1) {
       video.currentTime = 0;
       if (playingNormally) {
-        video.play();
+        startVideoPlayback();
       }
     }
     if (video.currentTime <= 0.1 && reverseMode) {
