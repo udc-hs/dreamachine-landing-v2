@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let lastScrollY = window.scrollY;
   let playingNormally = true; // Tracks if the video is playing at normal speed
   let scrollVelocity = 0; // Stores smoothed scroll speed
+  let reverseMode = false; // Tracks if video is reversing
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
@@ -20,33 +21,50 @@ document.addEventListener("DOMContentLoaded", function () {
       return; // No scrolling, do nothing
     }
 
-    // Smooth the scroll speed transition to prevent lag
+    // Smooth scroll effect
     scrollVelocity += (scrollDelta - scrollVelocity) / scrollSpeedFactor;
 
-    // Allow reverse playback (negative values)
-    let newSpeed = 1 + scrollVelocity;
-    video.playbackRate = Math.max(-2, Math.min(newSpeed, 4)); // Limit between -2x (reverse) and 4x (fast)
+    // If scrolling UP, slow down first before reversing
+    if (scrollVelocity < -0.5) {
+      video.pause();
+      reverseMode = true;
+      video.playbackRate = 1; // Reset rate to normal before reversing
+
+      // Create a smooth reverse effect
+      let reverseInterval = setInterval(() => {
+        if (video.currentTime > 0.1) {
+          video.currentTime -= 0.05; // Move backwards in small steps
+        } else {
+          video.currentTime = maxTime - 0.1; // Loop back to end if at start
+        }
+      }, 30);
+
+      // Stop reverse when scrolling stops
+      setTimeout(() => {
+        clearInterval(reverseInterval);
+        reverseMode = false;
+        video.play(); // Resume normal playback
+      }, 1500); // Adjust delay to match user scroll speed
+    } else {
+      // Forward playback with smooth speed adjustments
+      video.playbackRate = Math.max(0.5, Math.min(4, 1 + scrollVelocity));
+      reverseMode = false;
+    }
 
     playingNormally = false;
 
     // Reset to normal playback after scrolling stops
     clearTimeout(video.resetSpeedTimeout);
     video.resetSpeedTimeout = setTimeout(() => {
-      video.playbackRate = 1;
-      playingNormally = true;
-    }, 1500); // Delay before returning to normal speed
+      if (!reverseMode) {
+        video.playbackRate = 1;
+        playingNormally = true;
+      }
+    }, 1500);
   });
 
   // Seamless looping: when reaching the end or beginning, reset smoothly
   video.addEventListener("timeupdate", () => {
     if (video.currentTime >= maxTime - 0.1) {
       video.currentTime = 0;
-      if (playingNormally) {
-        video.play();
-      }
-    }
-    if (video.currentTime <= 0.1 && video.playbackRate < 0) {
-      video.currentTime = maxTime;
-    }
-  });
-});
+      if (playing
