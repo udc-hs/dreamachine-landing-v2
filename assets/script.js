@@ -8,10 +8,19 @@ document.addEventListener("DOMContentLoaded", function () {
   let scrollVelocity = 0; // Stores smoothed scroll speed
   let reverseMode = false; // Tracks if video is reversing
 
+  function startVideoPlayback() {
+    video.muted = true; // Ensure it's muted to allow autoplay
+    video.play().catch(error => console.error("Autoplay blocked:", error)); // Catch autoplay errors
+  }
+
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
-    video.play(); // Ensure the video starts playing normally
+    startVideoPlayback();
   });
+
+  // Force play on user interaction (click or scroll)
+  document.addEventListener("click", startVideoPlayback);
+  document.addEventListener("scroll", startVideoPlayback);
 
   document.addEventListener("scroll", () => {
     const scrollDelta = window.scrollY - lastScrollY; // Change in scroll position
@@ -75,4 +84,4 @@ document.addEventListener("DOMContentLoaded", function () {
       video.currentTime = maxTime - 0.1;
     }
   });
-}); // <- **This closing bracket was missing**
+});
