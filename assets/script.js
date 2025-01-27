@@ -1,32 +1,46 @@
 document.addEventListener("DOMContentLoaded", function () {
   const video = document.getElementById("backgroundVideo");
 
-  // Force reload to ensure the video loads properly
-  video.load();
-
   let maxTime = 0;
+  let scrollSpeedFactor = 5; // Adjust this value to control how much scrolling affects speed
+  let lastScrollY = window.scrollY;
+  let playingNormally = true; // Tracks if the video is playing at normal speed
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
+    video.play(); // Ensure the video starts playing normally
   });
 
   document.addEventListener("scroll", () => {
-    const scrollPosition = window.scrollY; // Current scroll position
-    const maxScroll = document.body.scrollHeight - window.innerHeight; // Max scrollable height
-    const scrollFraction = scrollPosition / maxScroll; // Normalize scroll (0 to 1)
-    
-    // Calculate the exact frame for the video
-    const targetTime = maxTime * scrollFraction;
+    const scrollDelta = window.scrollY - lastScrollY; // Difference in scroll position
+    lastScrollY = window.scrollY;
 
-    // Use fast seek for better performance
-    if (!video.seeking) {
-      video.currentTime = targetTime;
+    if (scrollDelta === 0) {
+      video.playbackRate = 1; // If no scrolling, normal speed
+      return;
     }
+
+    // Adjust video speed based on scroll speed (scrolling faster increases playback speed)
+    let newSpeed = 1 + (scrollDelta / scrollSpeedFactor);
+    video.playbackRate = Math.max(0.1, newSpeed); // Prevent extreme values (min 0.1x speed)
+
+    playingNormally = false; // Set to false to indicate user is controlling speed
+
+    // Reset normal play mode after a delay when scrolling stops
+    clearTimeout(video.resetSpeedTimeout);
+    video.resetSpeedTimeout = setTimeout(() => {
+      video.playbackRate = 1;
+      playingNormally = true;
+    }, 1000); // Delay in ms before returning to normal playback
   });
 
-  // Ensure the video loops properly when it reaches the end
-  video.addEventListener("ended", () => {
-    video.currentTime = 0;
-    video.play();
+  // Seamless looping: when reaching the end, restart smoothly
+  video.addEventListener("timeupdate", () => {
+    if (video.currentTime >= maxTime - 0.1) {
+      video.currentTime = 0;
+      if (playingNormally) {
+        video.play();
+      }
+    }
   });
 });
