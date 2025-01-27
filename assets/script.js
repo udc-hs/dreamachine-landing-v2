@@ -2,9 +2,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const video = document.getElementById("backgroundVideo");
 
   let maxTime = 0;
-  let scrollSpeedFactor = 5; // Adjusts how much scrolling affects playback speed
+  let scrollSpeedFactor = 50; // Higher = smoother acceleration/deceleration
   let lastScrollY = window.scrollY;
   let playingNormally = true; // Tracks if the video is playing at normal speed
+  let scrollVelocity = 0; // Stores smoothed scroll speed
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
@@ -12,35 +13,40 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   document.addEventListener("scroll", () => {
-    const scrollDelta = window.scrollY - lastScrollY; // Difference in scroll position
+    const scrollDelta = window.scrollY - lastScrollY; // Change in scroll position
     lastScrollY = window.scrollY;
 
     if (scrollDelta === 0) {
-      video.playbackRate = 1; // If no scrolling, normal speed
-      return;
+      return; // No scrolling, do nothing
     }
 
-    // Adjust video speed based on scroll speed, but limit within safe range (0.1x - 4x)
-    let newSpeed = 1 + (scrollDelta / scrollSpeedFactor);
-    video.playbackRate = Math.max(0.1, Math.min(newSpeed, 4)); // Clamp value between 0.1 and 4
+    // Smooth the scroll speed transition to prevent lag
+    scrollVelocity += (scrollDelta - scrollVelocity) / scrollSpeedFactor;
 
-    playingNormally = false; // User is controlling speed
+    // Allow reverse playback (negative values)
+    let newSpeed = 1 + scrollVelocity;
+    video.playbackRate = Math.max(-2, Math.min(newSpeed, 4)); // Limit between -2x (reverse) and 4x (fast)
+
+    playingNormally = false;
 
     // Reset to normal playback after scrolling stops
     clearTimeout(video.resetSpeedTimeout);
     video.resetSpeedTimeout = setTimeout(() => {
       video.playbackRate = 1;
       playingNormally = true;
-    }, 1000);
+    }, 1500); // Delay before returning to normal speed
   });
 
-  // Seamless looping: when reaching the end, restart smoothly
+  // Seamless looping: when reaching the end or beginning, reset smoothly
   video.addEventListener("timeupdate", () => {
     if (video.currentTime >= maxTime - 0.1) {
       video.currentTime = 0;
       if (playingNormally) {
         video.play();
       }
+    }
+    if (video.currentTime <= 0.1 && video.playbackRate < 0) {
+      video.currentTime = maxTime;
     }
   });
 });
