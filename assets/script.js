@@ -67,4 +67,12 @@ document.addEventListener("DOMContentLoaded", function () {
   video.addEventListener("timeupdate", () => {
     if (video.currentTime >= maxTime - 0.1) {
       video.currentTime = 0;
-      if (playing
+      if (playingNormally) {
+        video.play();
+      }
+    }
+    if (video.currentTime <= 0.1 && reverseMode) {
+      video.currentTime = maxTime - 0.1;
+    }
+  });
+}); // <- **This closing bracket was missing**
