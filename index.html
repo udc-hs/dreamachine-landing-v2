@@ -4,45 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fluid Scroll Video Scrubbing</title>
-  <style>
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      pointer-events: none;
-    }
-    body {
-      margin: 0;
-      height: 300vh; /* Extend page height for scrolling */
-      overflow-x: hidden;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <video id="backgroundVideo" muted playsinline preload="auto">
-    <source src="https://freight.cargo.site/m/X2181842273269969660982294074506/rotato-ai-test-3.mp4" type="video/mp4">
+    <source src="/rotato-ai-test-3.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  <script>
-    const video = document.getElementById('backgroundVideo');
-    let maxTime = 0;
-    video.addEventListener('loadedmetadata', () => {
-      maxTime = video.duration;
-    });
-    document.addEventListener('scroll', () => {
-      const scrollPosition = window.scrollY; // Current scroll position
-      const maxScroll = document.body.scrollHeight - window.innerHeight; // Maximum scrollable height
-      const scrollFraction = scrollPosition / maxScroll; // Normalize scroll position (0 to 1)
-      // Calculate the exact frame for the video
-      const targetTime = maxTime * scrollFraction;
-      // Use fast seek for better performance
-      if (!video.seeking) {
-        video.currentTime = targetTime;
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>

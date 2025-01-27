@@ -1,0 +1,16 @@
+video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  
+  body {
+    margin: 0;
+    height: 300vh; /* Extend page height for scrolling */
+    overflow-x: hidden;
+  }
+  

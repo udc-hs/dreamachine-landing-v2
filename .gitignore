@@ -1,0 +1,6 @@
+# Node Modules (if applicable)
+node_modules/
+# Build artifacts
+dist/
+# Logs
+*.log
