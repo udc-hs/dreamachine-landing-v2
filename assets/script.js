@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
   const video = document.getElementById("backgroundVideo");
+
+  // Force reload to ensure the video loads properly
+  video.load();
+
   let maxTime = 0;
 
   video.addEventListener("loadedmetadata", () => {
