@@ -23,4 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
       video.currentTime = targetTime;
     }
   });
+
+  // Ensure the video loops properly when it reaches the end
+  video.addEventListener("ended", () => {
+    video.currentTime = 0;
+    video.play();
+  });
 });
