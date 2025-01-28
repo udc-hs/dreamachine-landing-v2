@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let reverseMode = false;
   let userInteracted = false;
   let lastFrameTime = performance.now();
-  let lastRestartAttempt = 0; // Prevent spamming restart function
+  let lastLogTime = 0; // Prevent excessive logging
 
   function startVideoPlayback() {
     if (!userInteracted) return;
@@ -24,20 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function forceRestartIfFrozen() {
     const now = performance.now();
-    
-    // Ensure we're not checking too frequently (every 5 seconds max)
-    if (now - lastRestartAttempt < 5000) return;
-    lastRestartAttempt = now;
-
-    // If playbackRate is 0 or the video is paused, restart it
-    if (video.playbackRate === 0 || video.paused || video.readyState < 3) {
+    if (video.paused || video.readyState < 3) {
       console.warn("Video appears frozen. Restarting playback...");
-      video.currentTime += 0.01; // Small shift to force refresh
+      video.currentTime += 0.01; 
       video.play().catch(error => console.error("Autoplay blocked:", error));
     }
   }
 
-  // Run freeze check every 5 seconds (prevents flooding console)
   setInterval(forceRestartIfFrozen, 5000);
 
   document.addEventListener("visibilitychange", () => {
@@ -48,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
-    startVideoPlayback(); // Ensure playback starts after metadata loads
+    startVideoPlayback();
   });
 
   function handleUserInteraction() {
@@ -69,21 +62,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!userInteracted) return;
 
-    scrollVelocity *= 0.95; // Apply gradual slowdown
+    scrollVelocity *= 0.95; 
 
     let speedMultiplier = Math.max(0.1, Math.min(4, 1 + Math.abs(scrollVelocity)));
 
     if (scrollVelocity < 0) {
       reverseMode = true;
-      video.playbackRate = 1; // Keep playbackRate normal
+      video.playbackRate = 1;
       video.currentTime -= Math.abs(scrollVelocity) * deltaTime * 1.5;
     } else {
       reverseMode = false;
       video.playbackRate = speedMultiplier;
     }
 
-    // Prevent excessive force restarts
-    forceRestartIfFrozen();
+    const logInterval = 500; // Log only every 500ms
+    if (now - lastLogTime > logInterval) {
+      lastLogTime = now;
+      console.log("Animation running, scroll velocity:", scrollVelocity);
+    }
   }
 
   requestAnimationFrame(smoothUpdate);
