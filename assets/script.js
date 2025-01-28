@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let reverseMode = false;
   let userInteracted = false;
   let lastFrameTime = performance.now();
-  let lastLogTime = 0; // Prevent excessive logging
+  let lastVideoTime = 0;
+  let lastLogTime = 0;
 
   function startVideoPlayback() {
     if (!userInteracted) return;
@@ -24,13 +25,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function forceRestartIfFrozen() {
     const now = performance.now();
-    if (video.paused || video.readyState < 3) {
+    
+    // Only check every 3 seconds to avoid unnecessary calls
+    if (now - lastLogTime < 3000) return;
+
+    // Check if video is truly stuck (no movement over time)
+    if (Math.abs(video.currentTime - lastVideoTime) < 0.02) {
       console.warn("Video appears frozen. Restarting playback...");
-      video.currentTime += 0.01; 
+      video.currentTime += 0.01; // Slight nudge
       video.play().catch(error => console.error("Autoplay blocked:", error));
     }
+
+    lastVideoTime = video.currentTime;
+    lastLogTime = now;
   }
 
+  // Run freeze check every 5s, but intelligently
   setInterval(forceRestartIfFrozen, 5000);
 
   document.addEventListener("visibilitychange", () => {
@@ -62,9 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!userInteracted) return;
 
-    scrollVelocity *= 0.95; 
+    // Apply damping to prevent wild speed fluctuations
+    scrollVelocity *= 0.92;
 
-    let speedMultiplier = Math.max(0.1, Math.min(4, 1 + Math.abs(scrollVelocity)));
+    let speedMultiplier = 1 + Math.min(3, Math.abs(scrollVelocity) * 2); // Limit max speed to 3x
 
     if (scrollVelocity < 0) {
       reverseMode = true;
@@ -75,10 +86,10 @@ document.addEventListener("DOMContentLoaded", function () {
       video.playbackRate = speedMultiplier;
     }
 
-    const logInterval = 500; // Log only every 500ms
-    if (now - lastLogTime > logInterval) {
+    // Reduce logging spam
+    if (now - lastLogTime > 2000) {
+      console.log("Scroll velocity:", scrollVelocity, "Playback speed:", video.playbackRate);
       lastLogTime = now;
-      console.log("Animation running, scroll velocity:", scrollVelocity);
     }
   }
 
