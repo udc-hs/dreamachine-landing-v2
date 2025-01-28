@@ -2,13 +2,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const video = document.getElementById("backgroundVideo");
 
   let maxTime = 0;
-  let scrollSpeedFactor = 50; // Higher = smoother acceleration/deceleration
+  let scrollSpeedFactor = 50;
   let lastScrollY = window.scrollY;
-  let playingNormally = true; // Tracks if the video is playing at normal speed
-  let scrollVelocity = 0; // Stores smoothed scroll speed
-  let reverseMode = false; // Tracks if video is reversing
-  let userInteracted = false; // Detects if the user has interacted
-  let lastFrameTime = performance.now(); // Tracks time between frames
+  let playingNormally = true;
+  let scrollVelocity = 0;
+  let reverseMode = false;
+  let userInteracted = false;
+  let lastFrameTime = performance.now();
 
   function startVideoPlayback() {
     if (!userInteracted) return;
@@ -16,18 +16,20 @@ document.addEventListener("DOMContentLoaded", function () {
     video.muted = true;
     video.loop = true;
 
-    if (video.paused) {
+    if (video.paused || video.readyState < 3) {
       video.play().catch(error => console.error("Autoplay blocked:", error));
     }
   }
 
-  // Prevent browser from pausing video due to power-saving
-  setInterval(() => {
-    if (video.paused) {
-      console.log("Restarting video playback to prevent browser pause.");
-      video.play().catch(error => console.error("Autoplay blocked:", error));
-    }
-  }, 5000);
+  function forceRestartIfFrozen() {
+    if (!video.paused && video.readyState >= 3) return;
+
+    console.warn("Video appears frozen. Restarting playback...");
+    video.currentTime = video.currentTime + 0.01; // Small time shift to force refresh
+    video.play().catch(error => console.error("Autoplay blocked:", error));
+  }
+
+  setInterval(forceRestartIfFrozen, 3000); // Check every 3 seconds
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
@@ -43,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     userInteracted = true;
     startVideoPlayback();
   }
-  
+
   document.addEventListener("click", handleUserInteraction);
   document.addEventListener("scroll", handleUserInteraction);
   document.addEventListener("touchstart", handleUserInteraction);
@@ -52,26 +54,25 @@ document.addEventListener("DOMContentLoaded", function () {
     requestAnimationFrame(smoothUpdate);
 
     let now = performance.now();
-    let deltaTime = (now - lastFrameTime) / 1000; // Convert to seconds
+    let deltaTime = (now - lastFrameTime) / 1000;
     lastFrameTime = now;
 
     if (!userInteracted) return;
 
-    // Apply gradual slowdown instead of instant change
-    scrollVelocity *= 0.95; // Dampening factor to prevent sudden spikes
+    scrollVelocity *= 0.95;
 
-    // Clamp playback speed between 0.1x (slow motion) and 4x (max)
     let speedMultiplier = Math.max(0.1, Math.min(4, 1 + Math.abs(scrollVelocity)));
 
-    // If scrolling up (reverse), update time manually instead of setting a negative playbackRate
     if (scrollVelocity < 0) {
       reverseMode = true;
-      video.playbackRate = 1; // Keep normal playbackRate
-      video.currentTime -= Math.abs(scrollVelocity) * deltaTime * 2; // Smooth reverse
+      video.playbackRate = 1;
+      video.currentTime -= Math.abs(scrollVelocity) * deltaTime * 1.5;
     } else {
       reverseMode = false;
       video.playbackRate = speedMultiplier;
     }
+
+    forceRestartIfFrozen();
   }
 
   requestAnimationFrame(smoothUpdate);
@@ -84,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (scrollDelta === 0) return;
 
-    // Smooth out the velocity
     scrollVelocity += (scrollDelta - scrollVelocity) / scrollSpeedFactor;
 
     playingNormally = false;
