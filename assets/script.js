@@ -60,15 +60,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Apply gradual slowdown instead of instant change
     scrollVelocity *= 0.95; // Dampening factor to prevent sudden spikes
 
-    // Prevent extreme values
-    let speedMultiplier = Math.max(-2, Math.min(4, 1 + scrollVelocity));
+    // Clamp playback speed between 0.1x (slow motion) and 4x (max)
+    let speedMultiplier = Math.max(0.1, Math.min(4, 1 + Math.abs(scrollVelocity)));
 
-    // Update playback rate smoothly
-    video.playbackRate = speedMultiplier;
-
-    // If scrolling fast, gradually change the time instead of instant jumps
-    if (Math.abs(scrollVelocity) > 0.1) {
-      video.currentTime += scrollVelocity * deltaTime * 2; // Adjust time gradually
+    // If scrolling up (reverse), update time manually instead of setting a negative playbackRate
+    if (scrollVelocity < 0) {
+      reverseMode = true;
+      video.playbackRate = 1; // Keep normal playbackRate
+      video.currentTime -= Math.abs(scrollVelocity) * deltaTime * 2; // Smooth reverse
+    } else {
+      reverseMode = false;
+      video.playbackRate = speedMultiplier;
     }
   }
 
