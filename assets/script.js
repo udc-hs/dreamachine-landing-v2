@@ -8,21 +8,37 @@ document.addEventListener("DOMContentLoaded", function () {
   let scrollVelocity = 0; // Stores smoothed scroll speed
   let reverseMode = false; // Tracks if video is reversing
   let userInteracted = false; // Detects if the user has interacted
+  let lastFrameTime = performance.now(); // Tracks time between frames
 
   function startVideoPlayback() {
-    if (!userInteracted) return; // Ensure playback only starts after interaction
+    if (!userInteracted) return;
 
-    video.muted = true; // Ensure muted for autoplay
+    video.muted = true;
+    video.loop = true;
+
     if (video.paused) {
       video.play().catch(error => console.error("Autoplay blocked:", error));
     }
   }
 
+  // Prevent browser from pausing video due to power-saving
+  setInterval(() => {
+    if (video.paused) {
+      console.log("Restarting video playback to prevent browser pause.");
+      video.play().catch(error => console.error("Autoplay blocked:", error));
+    }
+  }, 5000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      startVideoPlayback();
+    }
+  });
+
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
   });
 
-  // Start video after user interacts (click, scroll, touch)
   function handleUserInteraction() {
     userInteracted = true;
     startVideoPlayback();
@@ -32,48 +48,45 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("scroll", handleUserInteraction);
   document.addEventListener("touchstart", handleUserInteraction);
 
+  function smoothUpdate() {
+    requestAnimationFrame(smoothUpdate);
+
+    let now = performance.now();
+    let deltaTime = (now - lastFrameTime) / 1000; // Convert to seconds
+    lastFrameTime = now;
+
+    if (!userInteracted) return;
+
+    // Apply gradual slowdown instead of instant change
+    scrollVelocity *= 0.95; // Dampening factor to prevent sudden spikes
+
+    // Prevent extreme values
+    let speedMultiplier = Math.max(-2, Math.min(4, 1 + scrollVelocity));
+
+    // Update playback rate smoothly
+    video.playbackRate = speedMultiplier;
+
+    // If scrolling fast, gradually change the time instead of instant jumps
+    if (Math.abs(scrollVelocity) > 0.1) {
+      video.currentTime += scrollVelocity * deltaTime * 2; // Adjust time gradually
+    }
+  }
+
+  requestAnimationFrame(smoothUpdate);
+
   document.addEventListener("scroll", () => {
     if (!userInteracted) return;
 
     const scrollDelta = window.scrollY - lastScrollY;
     lastScrollY = window.scrollY;
 
-    if (scrollDelta === 0) {
-      return; // No scrolling, do nothing
-    }
+    if (scrollDelta === 0) return;
 
-    // Smooth scroll effect
+    // Smooth out the velocity
     scrollVelocity += (scrollDelta - scrollVelocity) / scrollSpeedFactor;
-
-    // If scrolling UP, slow down first before reversing
-    if (scrollVelocity < -0.5) {
-      reverseMode = true;
-      video.playbackRate = 1; // Reset rate to normal before reversing
-
-      // Create a smooth reverse effect
-      let reverseInterval = setInterval(() => {
-        if (video.currentTime > 0.1) {
-          video.currentTime -= 0.05;
-        } else {
-          video.currentTime = maxTime - 0.1; // Loop back to end if at start
-        }
-      }, 30);
-
-      // Stop reverse when scrolling stops
-      setTimeout(() => {
-        clearInterval(reverseInterval);
-        reverseMode = false;
-        startVideoPlayback(); // Resume normal playback
-      }, 1500);
-    } else {
-      // Forward playback with smooth speed adjustments
-      video.playbackRate = Math.max(0.5, Math.min(4, 1 + scrollVelocity));
-      reverseMode = false;
-    }
 
     playingNormally = false;
 
-    // Reset to normal playback after scrolling stops
     clearTimeout(video.resetSpeedTimeout);
     video.resetSpeedTimeout = setTimeout(() => {
       if (!reverseMode) {
@@ -83,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 1500);
   });
 
-  // Seamless looping: when reaching the end or beginning, reset smoothly
   video.addEventListener("timeupdate", () => {
     if (video.currentTime >= maxTime - 0.1) {
       video.currentTime = 0;
