@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let reverseMode = false;
   let userInteracted = false;
   let lastFrameTime = performance.now();
+  let lastRestartAttempt = 0; // Prevent spamming restart function
 
   function startVideoPlayback() {
     if (!userInteracted) return;
@@ -22,14 +23,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function forceRestartIfFrozen() {
-    if (!video.paused && video.readyState >= 3) return;
+    const now = performance.now();
+    
+    // Ensure we're not checking too frequently (every 5 seconds max)
+    if (now - lastRestartAttempt < 5000) return;
+    lastRestartAttempt = now;
 
-    console.warn("Video appears frozen. Restarting playback...");
-    video.currentTime = video.currentTime + 0.01; // Small time shift to force refresh
-    video.play().catch(error => console.error("Autoplay blocked:", error));
+    // If playbackRate is 0 or the video is paused, restart it
+    if (video.playbackRate === 0 || video.paused || video.readyState < 3) {
+      console.warn("Video appears frozen. Restarting playback...");
+      video.currentTime += 0.01; // Small shift to force refresh
+      video.play().catch(error => console.error("Autoplay blocked:", error));
+    }
   }
 
-  setInterval(forceRestartIfFrozen, 3000); // Check every 3 seconds
+  // Run freeze check every 5 seconds (prevents flooding console)
+  setInterval(forceRestartIfFrozen, 5000);
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
@@ -39,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   video.addEventListener("loadedmetadata", () => {
     maxTime = video.duration;
+    startVideoPlayback(); // Ensure playback starts after metadata loads
   });
 
   function handleUserInteraction() {
@@ -59,19 +69,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!userInteracted) return;
 
-    scrollVelocity *= 0.95;
+    scrollVelocity *= 0.95; // Apply gradual slowdown
 
     let speedMultiplier = Math.max(0.1, Math.min(4, 1 + Math.abs(scrollVelocity)));
 
     if (scrollVelocity < 0) {
       reverseMode = true;
-      video.playbackRate = 1;
+      video.playbackRate = 1; // Keep playbackRate normal
       video.currentTime -= Math.abs(scrollVelocity) * deltaTime * 1.5;
     } else {
       reverseMode = false;
       video.playbackRate = speedMultiplier;
     }
 
+    // Prevent excessive force restarts
     forceRestartIfFrozen();
   }
 
