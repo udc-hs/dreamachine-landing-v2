@@ -4,11 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fluid Scroll Video Scrubbing</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+    body {
+      margin: 0;
+      height: 300vh;
+      overflow-x: hidden;
+    }
+  </style>
 </head>
 <body>
   <video id="backgroundVideo" muted playsinline preload="auto" loop>
-    <source src="https://zdc8qdrfsykojs9o.public.blob.vercel-storage.com/dreamachine_v3-mCl7noWPdg6dX0LTbz58nfMFg7oVEA.mp4" type="video/mp4">
+    <source src="https://zdc8qdrfsykojs9o.public.blob.vercel-storage.com/CAR0001-0250%20(2)-w5IF3htXrApI0YtFPGZLnVQZN8wHxP.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <script src="assets/script.js"></script>
