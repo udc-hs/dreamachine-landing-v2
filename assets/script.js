@@ -26,13 +26,11 @@ document.addEventListener("DOMContentLoaded", function () {
   function forceRestartIfFrozen() {
     const now = performance.now();
     
-    // Only check every 3 seconds to avoid unnecessary calls
     if (now - lastLogTime < 3000) return;
 
-    // Check if video is truly stuck (no movement over time)
     if (Math.abs(video.currentTime - lastVideoTime) < 0.02) {
       console.warn("Video appears frozen. Restarting playback...");
-      video.currentTime += 0.01; // Slight nudge
+      video.currentTime += 0.01;
       video.play().catch(error => console.error("Autoplay blocked:", error));
     }
 
@@ -40,7 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
     lastLogTime = now;
   }
 
-  // Run freeze check every 5s, but intelligently
   setInterval(forceRestartIfFrozen, 5000);
 
   document.addEventListener("visibilitychange", () => {
@@ -72,10 +69,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!userInteracted) return;
 
-    // Apply damping to prevent wild speed fluctuations
     scrollVelocity *= 0.92;
 
-    let speedMultiplier = 1 + Math.min(3, Math.abs(scrollVelocity) * 2); // Limit max speed to 3x
+    let speedMultiplier = 1 + Math.min(3, Math.abs(scrollVelocity) * 2);
 
     if (scrollVelocity < 0) {
       reverseMode = true;
@@ -86,7 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
       video.playbackRate = speedMultiplier;
     }
 
-    // Reduce logging spam
     if (now - lastLogTime > 2000) {
       console.log("Scroll velocity:", scrollVelocity, "Playback speed:", video.playbackRate);
       lastLogTime = now;
