@@ -1,13 +1,13 @@
-/* Reset Styles */
+/* General Reset */
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: black;
+  background-color: black;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 /* Video Styling */
@@ -15,43 +15,47 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
+  z-index: -1;
 }
 
-/* Animated White Line */
-.top-line {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 0%;
-  height: 2px;
-  background-color: white;
-  transform: translateX(-50%);
-  animation: lineGrow 1.5s ease-out forwards;
-}
-
-@keyframes lineGrow {
-  0% { width: 0%; }
-  100% { width: 90%; }
-}
-
-/* Bottom Centered Logo */
-.logo {
+/* Logo Styling */
+#logo {
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  width: 150px;
 }
 
-.logo img {
-  height: 50px;
-  filter: invert(1); /* Makes it white if it's a black logo */
+/* White Lines */
+.line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: white;
   opacity: 0.8;
-  transition: opacity 0.3s ease-in-out;
+  animation: drawLine 1.5s ease-in-out forwards;
 }
 
-.logo img:hover {
-  opacity: 1;
+/* Positioning the White Lines */
+.top-line {
+  top: 0;
+}
+.bottom-line {
+  bottom: 0;
+}
+
+/* Line Animation */
+@keyframes drawLine {
+  0% {
+      width: 0;
+      opacity: 0;
+  }
+  100% {
+      width: 100%;
+      opacity: 1;
+  }
 }
