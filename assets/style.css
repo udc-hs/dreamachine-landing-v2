@@ -24,28 +24,40 @@ body {
 /* Logo Styling */
 #logo {
   position: absolute;
-  bottom: 20px;
+  bottom: 40px; /* Adjusted spacing to match Mosaert */
   left: 50%;
   transform: translateX(-50%);
-  width: 150px;
+  width: 80px;
 }
 
 /* White Lines */
 .line {
   position: absolute;
-  width: 100%;
   height: 2px;
   background-color: white;
   opacity: 0.8;
   animation: drawLine 1.5s ease-in-out forwards;
 }
 
-/* Positioning the White Lines */
+/* Top Line - Full Width */
 .top-line {
-  top: 0;
+  width: 95%;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
 }
-.bottom-line {
-  bottom: 0;
+
+/* Bottom Line - Split in the Middle */
+.bottom-line-left {
+  width: 40%;
+  bottom: 40px;
+  left: 5%;
+}
+
+.bottom-line-right {
+  width: 40%;
+  bottom: 40px;
+  right: 5%;
 }
 
 /* Line Animation */
@@ -55,7 +67,6 @@ body {
       opacity: 0;
   }
   100% {
-      width: 100%;
       opacity: 1;
   }
 }
