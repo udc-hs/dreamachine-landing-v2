@@ -1,13 +1,14 @@
-/* Fullscreen Layout */
-html, body {
+/* Ensure fullscreen layout */
+body, html {
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
+	background: black;
   }
   
-  /* Video Background */
+  /* Video container */
   .video-container {
 	position: fixed;
 	top: 0;
@@ -18,33 +19,36 @@ html, body {
 	pointer-events: none;
   }
   
-  /* Feathered Reveal for Top Video */
-  .top-video {
-	position: absolute;
-	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-	mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
-  }
-  
-  /* Clickable Logo with Glow Effect */
+  /* Clickable Logo */
   .logo {
 	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 80vw;  
+	width: 80vw;
 	max-width: 1000px;
 	height: auto;
 	cursor: pointer;
 	z-index: 10;
-	
-	/* Static Glow Effect */
-	filter: drop-shadow(0px 0px 25px rgba(255, 255, 255, 0.9));
-	transition: filter 0.3s ease-in-out;
+	filter: drop-shadow(0px 0px 20px rgba(255,255,255,0.8)); /* Glow effect */
   }
   
-  /* Slight Glow Increase on Hover */
-  .logo:hover {
-	filter: drop-shadow(0px 0px 35px rgba(255, 255, 255, 1));
+  /* Start Button */
+  .start-button {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 20px 40px;
+	background: white;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+	z-index: 20;
+  }
+  
+  /* Hide start button after clicking */
+  .hidden {
+	display: none;
   }
   
