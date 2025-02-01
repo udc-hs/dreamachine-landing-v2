@@ -45,11 +45,11 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80vw;  /* Responsive: 80% of viewport width */
-      max-width: 1000px;  /* Prevents the logo from becoming too large */
+      width: 80vw;
+      max-width: 1000px;
       height: auto;
       cursor: pointer;
-      z-index: 10; /* Ensures it's above videos */
+      z-index: 10;
       filter: drop-shadow(0px 0px 10px rgba(255,255,255,0.8)); /* Soft glow effect */
     }
   </style>
@@ -74,10 +74,8 @@
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
 
-    let revealRadius = 50; // Hard center reveal radius
-    let featherRadius = 300; // Soft fade edges
-    let lastSyncTime = performance.now();
-    let lastBuffered = 0;
+    let revealRadius = 50;
+    let featherRadius = 300;
     let hasInteracted = false;
 
     // **Ensure videos fully load before playing**
@@ -90,7 +88,7 @@
       if (hasInteracted) startVideos();
     }
 
-    // **Start videos in sync (without resetting time)**
+    // **Start videos in sync**
     function startVideos() {
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
@@ -99,43 +97,33 @@
         .catch(error => console.warn("Autoplay blocked: Waiting for user interaction."));
     }
 
-    // **Continuous sync correction**
+    // **Maintain Sync**
     function forceFrameSync() {
       if (Math.abs(topVideo.currentTime - bottomVideo.currentTime) > 0.02) {
         bottomVideo.currentTime = topVideo.currentTime;
       }
     }
 
-    // **Check if videos freeze, but only restart if necessary**
-    function checkVideoFreeze() {
-      let now = performance.now();
-      if (now - lastBuffered > 5000) {
-        console.warn("Video appears frozen. Restarting...");
+    // **Prevent Browser Cancellations**
+    function ensureVideosPlaying() {
+      if (topVideo.paused || bottomVideo.paused) {
+        console.warn("One of the videos paused, restarting...");
         startVideos();
       }
     }
 
-    // **Update when videos are buffering (prevents false freezes)**
-    function updateBufferTime() {
-      lastBuffered = performance.now();
-    }
-
-    // **Prevent mask effect from affecting playback**
+    // **Prevent Masking from Affecting Playback**
     document.addEventListener("mousemove", (event) => {
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
-
       requestAnimationFrame(() => {
-        const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
+        const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${event.clientX}px ${event.clientY}px, 
                             rgba(0,0,0,1) ${revealRadius}px, 
                             rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
-
         topVideo.style.maskImage = maskStyle;
         topVideo.style.webkitMaskImage = maskStyle;
       });
     });
 
-    // **User Interaction: Ensure autoplay works**
+    // **Click to Play (Fixes Autoplay Block)**
     document.addEventListener("click", () => {
       if (!hasInteracted) {
         hasInteracted = true;
@@ -143,13 +131,11 @@
       }
     });
 
-    // **Sync correction and freeze check intervals**
-    setInterval(forceFrameSync, 16); // Frame-sync at ~60fps
-    setInterval(checkVideoFreeze, 2000); // Restart if stuck
-    topVideo.addEventListener("progress", updateBufferTime);
-    bottomVideo.addEventListener("progress", updateBufferTime);
+    // **Ensure Videos Stay Playing**
+    setInterval(forceFrameSync, 16);
+    setInterval(ensureVideosPlaying, 3000);
 
-    // **Start preloading but wait for user action if autoplay blocked**
+    // **Start Preloading**
     preloadVideos();
   </script>
 </body>
