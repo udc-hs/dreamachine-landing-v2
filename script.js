@@ -1,14 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
-    const startButton = document.getElementById("startButton");
   
     let videosLoaded = 0;
   
     function checkVideosReady() {
       videosLoaded++;
       if (videosLoaded === 2) {
-        console.log("Videos preloaded.");
+        syncVideos();
       }
     }
   
@@ -35,14 +34,21 @@ document.addEventListener("DOMContentLoaded", () => {
       syncVideos();
     }
   
-    // Ensure videos stay in sync when ended
     topVideo.addEventListener("ended", restartVideos);
     bottomVideo.addEventListener("ended", restartVideos);
   
-    // Start on user interaction
-    startButton.addEventListener("click", () => {
-      startButton.classList.add("hidden"); // Hide button
-      syncVideos();
+    // Mouse movement reveal effect (DOES NOT affect playback)
+    document.addEventListener("mousemove", (event) => {
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+  
+      // Adjust radial gradient so the center is fully revealed with only feathered edges
+      const maskStyle = `radial-gradient(circle 400px at ${mouseX}px ${mouseY}px, 
+                          rgba(0,0,0,1) 100px, 
+                          rgba(0,0,0,0) 400px)`;
+      
+      topVideo.style.maskImage = maskStyle;
+      topVideo.style.webkitMaskImage = maskStyle;
     });
   });
   

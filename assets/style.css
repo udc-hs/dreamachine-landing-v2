@@ -19,6 +19,14 @@ body, html {
 	pointer-events: none;
   }
   
+  /* Reveal effect for top video */
+  .top-video {
+	position: absolute;
+	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+	mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
+  }
+  
   /* Clickable Logo */
   .logo {
 	position: fixed;
@@ -31,24 +39,5 @@ body, html {
 	cursor: pointer;
 	z-index: 10;
 	filter: drop-shadow(0px 0px 20px rgba(255,255,255,0.8)); /* Glow effect */
-  }
-  
-  /* Start Button */
-  .start-button {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	padding: 20px 40px;
-	background: white;
-	border: none;
-	font-size: 1.5rem;
-	cursor: pointer;
-	z-index: 20;
-  }
-  
-  /* Hide start button after clicking */
-  .hidden {
-	display: none;
   }
   
