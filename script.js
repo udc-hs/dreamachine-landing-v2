@@ -1,61 +1,29 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
   
-    let videosLoaded = 0;
-  
-    function checkVideosReady() {
-      videosLoaded++;
-      if (videosLoaded === 2) {
-        syncVideos();
-      }
-    }
-  
-    topVideo.addEventListener("loadeddata", checkVideosReady);
-    bottomVideo.addEventListener("loadeddata", checkVideosReady);
-  
-    function syncVideos() {
-      topVideo.currentTime = 0;
-      bottomVideo.currentTime = 0;
-  
-      Promise.all([topVideo.play(), bottomVideo.play()])
-        .then(() => {
-          console.log("Both videos started in sync");
-        })
-        .catch(error => {
-          console.error("Error playing videos:", error);
-        });
-    }
-  
-    // Restart videos together
-    function restartVideos() {
-      topVideo.currentTime = 0;
-      bottomVideo.currentTime = 0;
-      syncVideos();
-    }
-  
-    topVideo.addEventListener("ended", restartVideos);
-    bottomVideo.addEventListener("ended", restartVideos);
-  
-    // Mouse movement reveal effect (DOES NOT affect playback)
-    document.addEventListener("mousemove", (event) => {
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
-  
-      // Adjust radial gradient so the center is fully revealed with only feathered edges
-      const maskStyle = `radial-gradient(circle 400px at ${mouseX}px ${mouseY}px, 
-                          rgba(0,0,0,1) 100px, 
-                          rgba(0,0,0,0) 400px)`;
-      
-      topVideo.style.maskImage = maskStyle;
-      topVideo.style.webkitMaskImage = maskStyle;
+    // Autoplay both videos.
+    Promise.all([topVideo.play(), bottomVideo.play()]).catch(function (error) {
+      console.error("Error starting videos:", error);
     });
   
-    // Prevent auto-pause on inactive tabs
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) {
-        syncVideos();
+    // Sync the videos to prevent drift.
+    function syncVideos() {
+      const threshold = 0.1; // seconds
+      const diff = topVideo.currentTime - bottomVideo.currentTime;
+      if (Math.abs(diff) > threshold) {
+        bottomVideo.currentTime = topVideo.currentTime;
       }
+      requestAnimationFrame(syncVideos);
+    }
+    requestAnimationFrame(syncVideos);
+  
+    // Update CSS variables based on mouse position.
+    document.addEventListener("mousemove", function (e) {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty("--mouse-x", `${x}%`);
+      document.documentElement.style.setProperty("--mouse-y", `${y}%`);
     });
   });
   
