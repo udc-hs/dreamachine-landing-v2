@@ -13,9 +13,46 @@
   <meta name="apple-mobile-web-app-title" content="dreamachine" />
   <link rel="manifest" href="assets/favicon/site.webmanifest" />
 
-  <!-- Link to External CSS -->
-  <link rel="stylesheet" href="assets/style.css">
-
+  <style>
+    /* Ensure fullscreen layout */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    /* Common styles for both videos */
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+    /* The top video has a circular reveal effect with feathered edges */
+    .top-video {
+      position: absolute;
+      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+      mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+      transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
+    }
+    /* Clickable Logo with Glow Effect */
+    .logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80vw;  /* Responsive: 80% of viewport width */
+      max-width: 1000px;  /* Prevents the logo from becoming too large */
+      height: auto;
+      cursor: pointer;
+      z-index: 10; /* Ensures it's above videos */
+      filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.7)); /* White glow effect */
+    }
+  </style>
 </head>
 <body>
   <!-- Bottom Video -->
@@ -23,18 +60,15 @@
     <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  
   <!-- Top Video (initially covering the bottom one) -->
   <video id="topVideo" class="video-container top-video" muted playsinline>
     <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  
   <!-- Clickable Logo -->
   <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
     <img src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png" alt="Logo" class="logo">
   </a>
-
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
