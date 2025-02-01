@@ -30,7 +30,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none;
     }
     /* The top video has a circular reveal effect with feathered edges */
     .top-video {
@@ -74,8 +73,6 @@
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
 
-    let revealRadius = 50;
-    let featherRadius = 300;
     let hasInteracted = false;
 
     // **Ensure videos fully load before playing**
@@ -97,31 +94,22 @@
         .catch(error => console.warn("Autoplay blocked: Waiting for user interaction."));
     }
 
-    // **Maintain Sync**
+    // **Maintain Sync without Restarting**
     function forceFrameSync() {
       if (Math.abs(topVideo.currentTime - bottomVideo.currentTime) > 0.02) {
+        bottomVideo.playbackRate = topVideo.playbackRate = 1;
         bottomVideo.currentTime = topVideo.currentTime;
       }
     }
 
-    // **Prevent Browser Cancellations**
+    // **Ensure Videos Keep Playing Without Restarting**
     function ensureVideosPlaying() {
       if (topVideo.paused || bottomVideo.paused) {
-        console.warn("One of the videos paused, restarting...");
-        startVideos();
+        console.warn("One of the videos paused, resuming...");
+        topVideo.play();
+        bottomVideo.play();
       }
     }
-
-    // **Prevent Masking from Affecting Playback**
-    document.addEventListener("mousemove", (event) => {
-      requestAnimationFrame(() => {
-        const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${event.clientX}px ${event.clientY}px, 
-                            rgba(0,0,0,1) ${revealRadius}px, 
-                            rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
-        topVideo.style.maskImage = maskStyle;
-        topVideo.style.webkitMaskImage = maskStyle;
-      });
-    });
 
     // **Click to Play (Fixes Autoplay Block)**
     document.addEventListener("click", () => {
@@ -131,7 +119,16 @@
       }
     });
 
-    // **Ensure Videos Stay Playing**
+    // **Fix for Mouse Hover**
+    document.addEventListener("mousemove", (event) => {
+      requestAnimationFrame(() => {
+        const maskStyle = `radial-gradient(circle 350px at ${event.clientX}px ${event.clientY}px, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)`;
+        topVideo.style.maskImage = maskStyle;
+        topVideo.style.webkitMaskImage = maskStyle;
+      });
+    });
+
+    // **Ensure Sync Without Resetting to 0**
     setInterval(forceFrameSync, 16);
     setInterval(ensureVideosPlaying, 3000);
 
