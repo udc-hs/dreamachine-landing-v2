@@ -1,4 +1,4 @@
-/* Ensure fullscreen layout */
+/* Fullscreen Layout */
 html, body {
 	margin: 0;
 	padding: 0;
@@ -7,7 +7,7 @@ html, body {
 	height: 100%;
   }
   
-  /* Common styles for both videos */
+  /* Video Background */
   .video-container {
 	position: fixed;
 	top: 0;
@@ -18,7 +18,7 @@ html, body {
 	pointer-events: none;
   }
   
-  /* The top video has a circular reveal effect with feathered edges */
+  /* Feathered Reveal for Top Video */
   .top-video {
 	position: absolute;
 	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
@@ -26,35 +26,25 @@ html, body {
 	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
   }
   
-  /* Clickable Logo with Glow */
+  /* Clickable Logo with Glow Effect */
   .logo {
 	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 80vw;  /* Responsive: 80% of viewport width */
-	max-width: 1000px;  /* Prevents the logo from becoming too large */
+	width: 80vw;  
+	max-width: 1000px;
 	height: auto;
 	cursor: pointer;
-	z-index: 10; /* Ensures it's above videos */
+	z-index: 10;
 	
-	/* Glowing Effect */
-	filter: drop-shadow(0px 0px 20px rgba(255, 255, 255, 0.8));
+	/* Static Glow Effect */
+	filter: drop-shadow(0px 0px 25px rgba(255, 255, 255, 0.9));
 	transition: filter 0.3s ease-in-out;
   }
   
-  /* Increase Glow on Hover */
+  /* Slight Glow Increase on Hover */
   .logo:hover {
-	filter: drop-shadow(0px 0px 40px rgba(255, 255, 255, 1));
+	filter: drop-shadow(0px 0px 35px rgba(255, 255, 255, 1));
   }
-  
-  /* Optional: Pulsating Glow */
-  @keyframes glowPulse {
-	0% { filter: drop-shadow(0px 0px 20px rgba(255, 255, 255, 0.8)); }
-	50% { filter: drop-shadow(0px 0px 40px rgba(255, 255, 255, 1)); }
-	100% { filter: drop-shadow(0px 0px 20px rgba(255, 255, 255, 0.8)); }
-  }
-  
-  /* Uncomment to Enable Pulsating Glow */
-  /* .logo { animation: glowPulse 2s infinite alternate ease-in-out; } */
   
