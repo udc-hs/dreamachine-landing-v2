@@ -39,7 +39,7 @@
       mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
       transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
     }
-    /* Clickable Logo with Glow Effect */
+    /* Clickable Logo */
     .logo {
       position: fixed;
       top: 50%;
@@ -50,18 +50,18 @@
       height: auto;
       cursor: pointer;
       z-index: 10; /* Ensures it's above videos */
-      filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.7)); /* White glow effect */
+      filter: drop-shadow(0px 0px 10px rgba(255,255,255,0.8)); /* Soft glow effect */
     }
   </style>
 </head>
 <body>
   <!-- Bottom Video -->
-  <video id="bottomVideo" class="video-container" muted playsinline>
+  <video id="bottomVideo" class="video-container" muted playsinline preload="auto">
     <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <!-- Top Video (initially covering the bottom one) -->
-  <video id="topVideo" class="video-container top-video" muted playsinline>
+  <video id="topVideo" class="video-container top-video" muted playsinline preload="auto">
     <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -69,62 +69,74 @@
   <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
     <img src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png" alt="Logo" class="logo">
   </a>
+
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
-    let revealRadius = 50; // Size of the fully revealed area (hard edge)
-    let featherRadius = 300; // Additional soft feathered edge
+    let revealRadius = 50; // Hard center reveal radius
+    let featherRadius = 300; // Soft fade edges
 
-    // Ensure both videos start at the exact same time
+    // **Ensure both videos are fully loaded before playing**
+    async function preloadVideos() {
+      await Promise.all([
+        new Promise(resolve => topVideo.addEventListener("loadedmetadata", resolve, { once: true })),
+        new Promise(resolve => bottomVideo.addEventListener("loadedmetadata", resolve, { once: true }))
+      ]);
+      syncVideos();
+    }
+
+    // **Ensure both videos start at the exact same time**
     function syncVideos() {
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
-      // Play both videos simultaneously
       Promise.all([topVideo.play(), bottomVideo.play()])
-        .then(() => {
-          console.log("Both videos started in sync");
-        })
-        .catch(error => {
-          console.error("Error playing videos:", error);
-        });
+        .then(() => console.log("Both videos started in sync"))
+        .catch(error => console.error("Error playing videos:", error));
     }
 
-    // Restart videos in sync when they end
+    // **New: Continuous sync mechanism**
+    function forceFrameSync() {
+      if (Math.abs(topVideo.currentTime - bottomVideo.currentTime) > 0.02) {
+        bottomVideo.currentTime = topVideo.currentTime;
+      }
+    }
+
+    // **Restart both videos together**
     function restartVideos() {
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
       syncVideos();
     }
 
-    // Sync playback speeds (prevents drift over time)
-    function matchPlaybackRates() {
-      bottomVideo.playbackRate = topVideo.playbackRate;
-    }
-
-    // Start videos once metadata is loaded
-    topVideo.addEventListener("loadedmetadata", syncVideos);
-    bottomVideo.addEventListener("loadedmetadata", syncVideos);
-
-    // Sync playback rates continuously
-    topVideo.addEventListener("ratechange", matchPlaybackRates);
-    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
-
-    // Ensure both videos restart together
-    topVideo.addEventListener("ended", restartVideos);
-    bottomVideo.addEventListener("ended", restartVideos);
-
-    // Mouse movement effect for reveal with a hard center and feathered edges
+    // **Prevent mouse movement from affecting playback**
     document.addEventListener("mousemove", (event) => {
       const mouseX = event.clientX;
       const mouseY = event.clientY;
-      // Adjust radial gradient so the center is fully revealed with only feathered edges
+      
       const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
                           rgba(0,0,0,1) ${revealRadius}px, 
                           rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
       
-      topVideo.style.maskImage = maskStyle;
-      topVideo.style.webkitMaskImage = maskStyle;
+      requestAnimationFrame(() => {
+        topVideo.style.maskImage = maskStyle;
+        topVideo.style.webkitMaskImage = maskStyle;
+      });
     });
+
+    // **Lock both videos together permanently**
+    setInterval(forceFrameSync, 16); // 16ms = ~60fps frame sync
+
+    // **Ensure correct playback speed**
+    function matchPlaybackRates() {
+      bottomVideo.playbackRate = topVideo.playbackRate;
+    }
+
+    // **Event Listeners**
+    preloadVideos();
+    topVideo.addEventListener("ratechange", matchPlaybackRates);
+    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
+    topVideo.addEventListener("ended", restartVideos);
+    bottomVideo.addEventListener("ended", restartVideos);
   </script>
 </body>
 </html>
