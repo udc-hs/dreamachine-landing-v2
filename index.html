@@ -39,7 +39,7 @@
       mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
       transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
     }
-    /* Clickable Logo */
+    /* Clickable Logo with Glow Effect */
     .logo {
       position: fixed;
       top: 50%;
@@ -73,26 +73,30 @@
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
+
     let revealRadius = 50; // Hard center reveal radius
     let featherRadius = 300; // Soft fade edges
-    let lastSyncTime = 0;
+    let lastSyncTime = performance.now();
+    let lastBuffered = 0;
+    let hasInteracted = false;
 
     // **Ensure videos fully load before playing**
     async function preloadVideos() {
       await Promise.all([
-        new Promise(resolve => topVideo.addEventListener("loadedmetadata", resolve, { once: true })),
-        new Promise(resolve => bottomVideo.addEventListener("loadedmetadata", resolve, { once: true }))
+        new Promise(resolve => topVideo.addEventListener("canplaythrough", resolve, { once: true })),
+        new Promise(resolve => bottomVideo.addEventListener("canplaythrough", resolve, { once: true }))
       ]);
-      syncVideos();
+      console.log("Videos preloaded.");
+      if (hasInteracted) startVideos();
     }
 
-    // **Force both videos to start at the exact same frame**
-    function syncVideos() {
+    // **Start videos in sync (without resetting time)**
+    function startVideos() {
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
       Promise.all([topVideo.play(), bottomVideo.play()])
         .then(() => console.log("Both videos started in sync"))
-        .catch(error => console.error("Error playing videos:", error));
+        .catch(error => console.warn("Autoplay blocked: Waiting for user interaction."));
     }
 
     // **Continuous sync correction**
@@ -102,14 +106,18 @@
       }
     }
 
-    // **Restart frozen videos**
+    // **Check if videos freeze, but only restart if necessary**
     function checkVideoFreeze() {
-      const now = performance.now();
-      if (now - lastSyncTime > 2000) { // 2 seconds without progress
-        console.warn("Video appears frozen. Restarting playback...");
-        syncVideos();
+      let now = performance.now();
+      if (now - lastBuffered > 5000) {
+        console.warn("Video appears frozen. Restarting...");
+        startVideos();
       }
-      lastSyncTime = now;
+    }
+
+    // **Update when videos are buffering (prevents false freezes)**
+    function updateBufferTime() {
+      lastBuffered = performance.now();
     }
 
     // **Prevent mask effect from affecting playback**
@@ -127,11 +135,21 @@
       });
     });
 
-    // **Monitor & Restart if video stops responding**
+    // **User Interaction: Ensure autoplay works**
+    document.addEventListener("click", () => {
+      if (!hasInteracted) {
+        hasInteracted = true;
+        startVideos();
+      }
+    });
+
+    // **Sync correction and freeze check intervals**
     setInterval(forceFrameSync, 16); // Frame-sync at ~60fps
     setInterval(checkVideoFreeze, 2000); // Restart if stuck
+    topVideo.addEventListener("progress", updateBufferTime);
+    bottomVideo.addEventListener("progress", updateBufferTime);
 
-    // **Start preloading and locking sync**
+    // **Start preloading but wait for user action if autoplay blocked**
     preloadVideos();
   </script>
 </body>
