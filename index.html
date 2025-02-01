@@ -1,63 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dreamachine</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dreamachine</title>
 
-    <!-- Favicon Links -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="assets/favicon/favicon-96x96.png"
-      sizes="96x96"
-    />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="assets/favicon/favicon.svg"
-    />
-    <link
-      rel="shortcut icon"
-      href="assets/favicon/favicon.ico"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="assets/favicon/apple-touch-icon.png"
-    />
-    <meta name="apple-mobile-web-app-title" content="dreamachine" />
-    <link rel="manifest" href="assets/favicon/site.webmanifest" />
+  <!-- Favicon Links -->
+  <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+  <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="dreamachine">
+  <link rel="manifest" href="assets/favicon/site.webmanifest">
 
-    <!-- External Stylesheet -->
-    <link rel="stylesheet" href="assets/styles/style.css" />
-  </head>
-  <body>
-    <!-- Bottom Video -->
-    <video id="bottomVideo" class="video-container" muted playsinline loop>
-      <source
-        src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4"
-        type="video/mp4"
-      />
-      Your browser does not support the video tag.
-    </video>
+  <!-- CSS File -->
+  <link rel="stylesheet" href="assets/styles/style.css">
+</head>
+<body>
+  <!-- Bottom Video -->
+  <video id="bottomVideo" class="video-container" autoplay loop muted playsinline preload="auto">
+    <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
+  </video>
 
-    <!-- Top Video (overlayed with the feathered mask) -->
-    <video id="topVideo" class="video-container top-video" muted playsinline loop>
-      <source
-        src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4"
-        type="video/mp4"
-      />
-      Your browser does not support the video tag.
-    </video>
+  <!-- Top Video (initially covering the bottom one) -->
+  <video id="topVideo" class="video-container top-video" autoplay loop muted playsinline preload="auto">
+    <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
+  </video>
 
-    <!-- Clickable Logo -->
-    <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&amp;body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
-      <img
-        src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png"
-        alt="Logo"
-        class="logo"
-      />
-    </a>
-  </body>
+  <!-- Clickable Logo -->
+  <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
+    <img src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png" alt="Logo" class="logo">
+  </a>
+</body>
 </html>

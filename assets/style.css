@@ -1,5 +1,5 @@
-/* Fullscreen layout for page */
-html, body {
+/* Ensure fullscreen layout */
+body, html {
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
@@ -7,7 +7,7 @@ html, body {
 	height: 100%;
   }
   
-  /* Both videos fill the viewport and overlay exactly */
+  /* Video container */
   .video-container {
 	position: fixed;
 	top: 0;
@@ -18,29 +18,24 @@ html, body {
 	pointer-events: none;
   }
   
-  /* Top video: applies a fixed radial mask to reveal the bottom video.
-	 The mask replicates your original values:
-	   - Overall gradient size: 350px
-	   - Centered at: 196px 78px
-	   - Hard edge at: 50px (opaque)
-	   - Feathered edge out to: 350px (transparent)
-  */
+  /* Top video has circular reveal effect */
   .top-video {
-	-webkit-mask-image: radial-gradient(350px at 196px 78px, rgb(0, 0, 0) 50px, rgba(0, 0, 0, 0) 350px);
-	mask-image: radial-gradient(350px at 196px 78px, rgb(0, 0, 0) 50px, rgba(0, 0, 0, 0) 350px);
+	position: absolute;
+	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+	mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
 	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
   }
   
-  /* Centered clickable logo */
+  /* Clickable Logo */
   .logo {
 	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 80vw;       /* 80% of viewport width */
-	max-width: 1000px; /* Maximum width */
+	width: 80vw;
+	max-width: 1000px;
 	height: auto;
 	cursor: pointer;
-	z-index: 10;       /* Above the videos */
+	z-index: 10;
   }
   
