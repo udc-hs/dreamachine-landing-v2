@@ -3,69 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dreamachine</title>
+    <title>Feathered Video Reveal with Clickable Logo</title>
 
     <!-- Favicon Links -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="assets/favicon/favicon-96x96.png"
-      sizes="96x96"
-    />
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg" />
     <link rel="shortcut icon" href="assets/favicon/favicon.ico" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="assets/favicon/apple-touch-icon.png"
-    />
-    <meta name="apple-mobile-web-app-title" content="dreamachine" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png" />
     <link rel="manifest" href="assets/favicon/site.webmanifest" />
 
     <!-- External Stylesheet -->
     <link rel="stylesheet" href="assets/styles/style.css" />
   </head>
   <body>
-    <!-- Video Wrapper to ensure correct overlay -->
-    <div class="video-wrapper">
-      <!-- Bottom Video (Always Visible) -->
-      <video
-        id="bottomVideo"
-        class="video-container"
-        muted
-        playsinline
-        preload="auto"
-        crossOrigin="anonymous"
-        loop
-      >
-        <source
-          src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4"
-          type="video/mp4"
-        />
-      </video>
+    <!-- Bottom Video (always visible) -->
+    <video id="bottomVideo" class="video-container" muted playsinline>
+      <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
 
-      <!-- Top Video (Overlayed, With Reveal Effect) -->
-      <video
-        id="topVideo"
-        class="video-container top-video"
-        muted
-        playsinline
-        preload="auto"
-        crossOrigin="anonymous"
-        loop
-      >
-        <source
-          src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4"
-          type="video/mp4"
-        />
-      </video>
-    </div>
+    <!-- Top Video (overlayed with reveal effect) -->
+    <video id="topVideo" class="video-container top-video" muted playsinline>
+      <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
 
-    <!-- Clickable Logo (Centered and Glowing) -->
-    <a
-      href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about..."
-      class="logo-link"
-    >
+    <!-- Clickable Logo (centered) -->
+    <a href="mailto:luke@unlimited-dream.com">
       <img
         src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png"
         alt="Logo"
@@ -73,7 +37,7 @@
       />
     </a>
 
-    <!-- Minimal JavaScript for Sync and Mouse Tracking -->
+    <!-- JavaScript for synchronization and mouse-driven reveal -->
     <script src="script.js"></script>
   </body>
 </html>

@@ -1,81 +1,41 @@
-/* Ensure the wrapper fills the viewport */
-.video-wrapper {
+/* Fullscreen layout for body and html */
+html, body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+  }
+  
+  /* Common styles for both videos */
+  .video-container {
 	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	overflow: hidden;
-	z-index: 0;
-  }
-  
-  /* All videos are centered and cover the screen */
-  .video-container {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	min-width: 100%;
-	min-height: 100%;
-	transform: translate(-50%, -50%);
 	object-fit: cover;
+	pointer-events: none;
   }
   
-  /* Stacking order */
-  #bottomVideo {
-	z-index: 1;
-  }
-  
-  #topVideo {
-	z-index: 2;
-  }
-  
-  /* CSS Mask Effect for the top video.
-	 Uses CSS variables for mouse position.
-	 The radial gradient creates a circular reveal effect. */
+  /* The top video overlay uses a radial mask for the reveal effect */
   .top-video {
-	-webkit-mask-image: radial-gradient(
-	  circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-	  rgba(0, 0, 0, 0) 60px,
-	  rgba(0, 0, 0, 1) 80px
-	);
-	mask-image: radial-gradient(
-	  circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-	  rgba(0, 0, 0, 0) 60px,
-	  rgba(0, 0, 0, 1) 80px
-	);
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
+	position: absolute;
+	-webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
+	mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
+	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
   }
   
-  /* Centered Logo Styling */
-  .logo-link {
-	position: absolute;
+  /* Clickable Logo styling (centered and on top) */
+  .logo {
+	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+	width: 80vw;       /* Responsive: 80% of viewport width */
+	max-width: 1000px; /* Prevents excessive sizing */
+	height: auto;
+	cursor: pointer;
 	z-index: 10;
-	text-decoration: none;
-  }
-  
-  /* Logo image with a glowing effect */
-  .logo {
-	width: 150px; /* Adjust size as needed */
-	animation: glow 2s infinite alternate;
-  }
-  
-  /* Glow animation */
-  @keyframes glow {
-	from {
-	  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
-	}
-	to {
-	  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1));
-	}
-  }
-  
-  /* Remove default body margin and set background */
-  body {
-	margin: 0;
-	background: #000;
   }
   
