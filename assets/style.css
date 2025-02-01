@@ -1,4 +1,4 @@
-/* Fullscreen layout for body and html */
+/* Ensure fullscreen layout */
 html, body {
 	margin: 0;
 	padding: 0;
@@ -7,9 +7,8 @@ html, body {
 	height: 100%;
   }
   
-  /* Common styles for both videos */
+  /* Both videos cover the viewport */
   .video-container {
-	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -18,22 +17,29 @@ html, body {
 	pointer-events: none;
   }
   
-  /* The top video overlay uses a radial mask for the reveal effect */
-  .top-video {
+  /* Bottom video: fixed positioning with stacking order */
+  #bottomVideo {
+	position: fixed;
+	z-index: 1;
+  }
+  
+  /* Top video: inherits full‑screen sizing, uses a radial mask for the reveal, and overlays the bottom video */
+  #topVideo {
 	position: absolute;
-	-webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
-	mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
+	z-index: 2;
+	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+	mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
 	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
   }
   
-  /* Clickable Logo styling (centered and on top) */
+  /* Clickable Logo: centered and layered above videos */
   .logo {
 	position: fixed;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	width: 80vw;       /* Responsive: 80% of viewport width */
-	max-width: 1000px; /* Prevents excessive sizing */
+	max-width: 1000px; /* Prevents excessive scaling */
 	height: auto;
 	cursor: pointer;
 	z-index: 10;
