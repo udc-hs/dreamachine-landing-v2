@@ -50,5 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
       topVideo.style.maskImage = maskStyle;
       topVideo.style.webkitMaskImage = maskStyle;
     });
+  
+    // Prevent auto-pause on inactive tabs
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        syncVideos();
+      }
+    });
   });
   
