@@ -3,43 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dreamachine</title>
-
-  <!-- Favicon Links -->
-  <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
-  <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
-  <link rel="shortcut icon" href="assets/favicon/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-title" content="dreamachine">
-  <link rel="manifest" href="assets/favicon/site.webmanifest">
-
+  <title>Feathered Video Reveal with Clickable Logo</title>
   <style>
     /* Ensure fullscreen layout */
     body, html {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-      background-color: black;
+      width: 100%;
+      height: 100%;
     }
 
-    /* Video container - ensures both videos are overlayed */
+    /* Common styles for both videos */
     .video-container {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       pointer-events: none;
-      z-index: 1;
     }
 
-    /* Top video has circular reveal effect */
+    /* The top video has a circular reveal effect with feathered edges */
     .top-video {
-      position: fixed;
-      z-index: 2;
+      position: absolute;
       -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
       mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
       transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
@@ -51,30 +39,94 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: min(80vw, 1000px);
-      max-width: 1000px;
+      width: 80vw;  /* Responsive: 80% of viewport width */
+      max-width: 1000px;  /* Prevents the logo from becoming too large */
       height: auto;
       cursor: pointer;
-      z-index: 3;
+      z-index: 10; /* Ensures it's above videos */
     }
   </style>
 </head>
 <body>
 
-  <!-- Bottom Video (Background) -->
-  <video id="bottomVideo" class="video-container" autoplay loop muted playsinline preload="auto">
+  <!-- Bottom Video -->
+  <video id="bottomVideo" class="video-container" muted playsinline>
     <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
+    Your browser does not support the video tag.
   </video>
 
-  <!-- Top Video (Reveal Effect) -->
-  <video id="topVideo" class="video-container top-video" autoplay loop muted playsinline preload="auto">
+  <!-- Top Video (initially covering the bottom one) -->
+  <video id="topVideo" class="video-container top-video" muted playsinline>
     <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
+    Your browser does not support the video tag.
   </video>
 
-  <!-- Clickable Logo with Correct Email, Subject, and Body -->
+  <!-- Clickable Logo -->
   <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
     <img src="https://freight.cargo.site/t/original/i/Y2190973051432224593926928323722/DM_Logo_for_web_V01.png" alt="Logo" class="logo">
   </a>
+
+  <script>
+    const topVideo = document.getElementById("topVideo");
+    const bottomVideo = document.getElementById("bottomVideo");
+
+    let revealRadius = 50; // Size of the fully revealed area (hard edge)
+    let featherRadius = 300; // Additional soft feathered edge
+
+    // Ensure both videos start at the exact same time
+    function syncVideos() {
+      topVideo.currentTime = 0;
+      bottomVideo.currentTime = 0;
+
+      // Play both videos simultaneously
+      Promise.all([topVideo.play(), bottomVideo.play()])
+        .then(() => {
+          console.log("Both videos started in sync");
+        })
+        .catch(error => {
+          console.error("Error playing videos:", error);
+        });
+    }
+
+    // Restart videos in sync when they end
+    function restartVideos() {
+      topVideo.currentTime = 0;
+      bottomVideo.currentTime = 0;
+      syncVideos();
+    }
+
+    // Sync playback speeds (prevents drift over time)
+    function matchPlaybackRates() {
+      bottomVideo.playbackRate = topVideo.playbackRate;
+    }
+
+    // Start videos once metadata is loaded
+    topVideo.addEventListener("loadedmetadata", syncVideos);
+    bottomVideo.addEventListener("loadedmetadata", syncVideos);
+
+    // Sync playback rates continuously
+    topVideo.addEventListener("ratechange", matchPlaybackRates);
+    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
+
+    // Ensure both videos restart together
+    topVideo.addEventListener("ended", restartVideos);
+    bottomVideo.addEventListener("ended", restartVideos);
+
+    // Mouse movement effect for reveal with a hard center and feathered edges
+    document.addEventListener("mousemove", (event) => {
+      const mouseX = event.clientX || 0;
+      const mouseY = event.clientY || 0;
+
+      // Adjust radial gradient so the center is fully revealed with only feathered edges
+      const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
+                          rgba(0,0,0,1) ${revealRadius}px, 
+                          rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
+      
+      topVideo.style.maskImage = maskStyle;
+      topVideo.style.webkitMaskImage = maskStyle;
+    });
+
+  </script>
 
 </body>
 </html>
