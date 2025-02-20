@@ -20,14 +20,8 @@ body, html {
 	z-index: 1; /* ✅ Both videos are aligned in the same z-layer */
   }
   
-  /* Top video has circular reveal effect */
-  .top-video {
-	position: fixed;
-	z-index: 2; /* ✅ Ensures top video is correctly stacked above */
-	-webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-	mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-	transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
-  }
+
+  
   
   /* Clickable Logo */
   .logo {
