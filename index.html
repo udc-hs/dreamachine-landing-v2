@@ -1,95 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamachine - Content Arm of The Unlimited Dream Company | Cinematic Live Experiences</title>
-    <style>
-        /* Ensure fullscreen layout */
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dreamachine</title>
+  <style>
+    /* Ensure fullscreen layout */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
 
-        /* Common styles for both videos */
-        .video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-        }
+    /* Common styles for both videos */
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
 
-        /* The top video has a circular reveal effect with feathered edges */
-        .top-video {
-            position: absolute;
-            -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-            mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-            transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
-        }
+    /* The top video has a circular reveal effect with feathered edges */
+    .top-video {
+      position: absolute;
+      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+      mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+      transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
+    }
 
-        /* Clickable Logo */
-        .logo {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            max-width: 1000px;
-            height: auto;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        /* --- NEW: CSS CLASS TO VISUALLY HIDE CONTENT --- */
-        .visually-hidden {
-            position: absolute !important;
-            clip: rect(1px, 1px, 1px, 1px) !important;
-            clip-path: inset(50%) !important;
-            height: 1px !important;
-            margin: -1px !important;
-            overflow: hidden !important;
-            padding: 0 !important;
-            white-space: nowrap !important;
-            width: 1px !important;
-            border: 0 !important;
-        }
-        /* ------------------------------------------------- */
-    </style>
+    /* Clickable Logo */
+    .logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80vw;  /* Responsive: 80% of viewport width */
+      max-width: 1000px;  /* Prevents the logo from becoming too large */
+      height: auto;
+      cursor: pointer;
+      z-index: 10; /* Ensures it's above videos */
+    }
+  </style>
 </head>
 <body>
 
-    <video id="bottomVideo" class="video-container" muted playsinline>
-        <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+  <!-- Bottom Video -->
+  <video id="bottomVideo" class="video-container" muted playsinline>
+    <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 
-    <video id="topVideo" class="video-container top-video" muted playsinline>
-        <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+  <!-- Top Video (initially covering the bottom one) -->
+  <video id="topVideo" class="video-container top-video" muted playsinline>
+    <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 
-    <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
-        <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Dreamachine by The Unlimited Dream Company Logo" class="logo">
-    </a>
+  <!-- Clickable Logo -->
+  <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
+    <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Logo" class="logo">
+  </a>
 
-    <div class="visually-hidden">
-        <h1>Dreamachine - The Content Arm of The Unlimited Dream Company</h1>
-        <p>Dreamachine is the dedicated content creation and visual narrative arm of The Unlimited Dream Company, a leading global creative production company.</p>
-        <p>We specialize in crafting immersive, cinematic, and story-driven content that integrates seamlessly with live show design, brand activations, and art installations. Our unique approach focuses on using diffused lighting and innovative visual techniques to amplify an artist's vision and message, creating unforgettable experiences for live audiences worldwide.</p>
-        <p>The Unlimited Dream Company offers comprehensive production design and creative direction services, from initial concept to final execution, ensuring every element supports a unified artistic vision. We work with major artists and brands globally to deliver impactful and emotionally resonant shows.</p>
+  <script>
+    const topVideo = document.getElementById("topVideo");
+    const bottomVideo = document.getElementById("bottomVideo");
 
-        <h2>Our Services:</h2>
-        <ul>
-            <li>**Cinematic Storytelling for Live:** Crafting narrative-driven visual content for stage.</li>
-            <li>**Show Design & Creative Direction:** Overseeing the entire artistic vision and aesthetic of live performances.</li>
-            <li>**Live Visuals:** Producing bespoke visual content, including video, animations, and lighting effects.</li>
-            <li>**Spatial Storytelling:** Utilizing the physical environment to enhance narrative and audience immersion.</li>
-            <li>**Brand Activations:** Designing unique, experiential marketing events with compelling visual narratives.</li>
-            <li>**Art Installations:** Developing captivating public and private art pieces with strong thematic cores.</li>
-            <li>**Content Creation (via Dreamachine):** Developing custom video, animation, and interactive media to support
+    let revealRadius = 50; // Size of the fully revealed area (hard edge)
+    let featherRadius = 300; // Additional soft feathered edge
+
+    // Ensure both videos start at the exact same time
+    function syncVideos() {
+      topVideo.currentTime = 0;
+      bottomVideo.currentTime = 0;
+
+      // Play both videos simultaneously
+      Promise.all([topVideo.play(), bottomVideo.play()])
+        .then(() => {
+          console.log("Both videos started in sync");
+        })
+        .catch(error => {
+          console.error("Error playing videos:", error);
+        });
+    }
+
+    // Restart videos in sync when they end
+    function restartVideos() {
+      topVideo.currentTime = 0;
+      bottomVideo.currentTime = 0;
+      syncVideos();
+    }
+
+    // Sync playback speeds (prevents drift over time)
+    function matchPlaybackRates() {
+      bottomVideo.playbackRate = topVideo.playbackRate;
+    }
+
+    // Start videos once metadata is loaded
+    topVideo.addEventListener("loadedmetadata", syncVideos);
+    bottomVideo.addEventListener("loadedmetadata", syncVideos);
+
+    // Sync playback rates continuously
+    topVideo.addEventListener("ratechange", matchPlaybackRates);
+    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
+
+    // Ensure both videos restart together
+    topVideo.addEventListener("ended", restartVideos);
+    bottomVideo.addEventListener("ended", restartVideos);
+
+    // Mouse movement effect for reveal with a hard center and feathered edges
+    document.addEventListener("mousemove", (event) => {
+      const mouseX = event.clientX || 0;
+      const mouseY = event.clientY || 0;
+
+      // Adjust radial gradient so the center is fully revealed with only feathered edges
+      const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
+                          rgba(0,0,0,1) ${revealRadius}px, 
+                          rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
+      
+      topVideo.style.maskImage = maskStyle;
+      topVideo.style.webkitMaskImage = maskStyle;
+    });
+
+  </script>
+
+</body>
+</html>
