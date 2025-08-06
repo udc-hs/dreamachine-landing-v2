@@ -45,6 +45,23 @@
       cursor: pointer;
       z-index: 10; /* Ensures it's above videos */
     }
+
+    /* Fullscreen overlay prompting user interaction */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      font-size: 2rem;
+      z-index: 20;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -65,6 +82,9 @@
   <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
     <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Logo" class="logo">
   </a>
+
+  <!-- Overlay to start playback -->
+  <div id="overlay" class="overlay">Tap to Start</div>
 
   <script>
     const topVideo = document.getElementById("topVideo");
@@ -100,10 +120,6 @@
       bottomVideo.playbackRate = topVideo.playbackRate;
     }
 
-    // Start videos once metadata is loaded
-    topVideo.addEventListener("loadedmetadata", syncVideos);
-    bottomVideo.addEventListener("loadedmetadata", syncVideos);
-
     // Sync playback rates continuously
     topVideo.addEventListener("ratechange", matchPlaybackRates);
     bottomVideo.addEventListener("ratechange", matchPlaybackRates);
@@ -112,19 +128,36 @@
     topVideo.addEventListener("ended", restartVideos);
     bottomVideo.addEventListener("ended", restartVideos);
 
-    // Mouse movement effect for reveal with a hard center and feathered edges
-    document.addEventListener("mousemove", (event) => {
-      const mouseX = event.clientX || 0;
-      const mouseY = event.clientY || 0;
-
-      // Adjust radial gradient so the center is fully revealed with only feathered edges
-      const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
-                          rgba(0,0,0,1) ${revealRadius}px, 
+    // Apply radial mask based on coordinates
+    function updateMask(x, y) {
+      const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${x}px ${y}px,
+                          rgba(0,0,0,1) ${revealRadius}px,
                           rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
-      
       topVideo.style.maskImage = maskStyle;
       topVideo.style.webkitMaskImage = maskStyle;
+    }
+
+    // Mouse movement effect for reveal with a hard center and feathered edges
+    document.addEventListener("mousemove", (event) => {
+      updateMask(event.clientX || 0, event.clientY || 0);
     });
+
+    // Touch movement support for mobile devices
+    document.addEventListener("touchmove", (event) => {
+      const touch = event.touches[0];
+      if (touch) {
+        updateMask(touch.clientX, touch.clientY);
+      }
+    });
+
+    // Start videos after user interaction
+    const overlay = document.getElementById("overlay");
+    function startPlayback() {
+      overlay.style.display = "none";
+      syncVideos();
+    }
+    overlay.addEventListener("click", startPlayback);
+    overlay.addEventListener("touchstart", startPlayback);
 
   </script>
 
