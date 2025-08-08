@@ -223,7 +223,6 @@
 
     // Sync playback rates continuously
     topVideo.addEventListener("ratechange", matchPlaybackRates);
-    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
 
     // Ensure both videos restart together (backup to loop)
     topVideo.addEventListener("ended", restartVideos);

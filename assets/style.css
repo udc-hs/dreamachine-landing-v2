@@ -8,7 +8,7 @@ body, html {
 	background-color: black; /* ✅ Prevents white flashes */
   }
   
-  /* Video container - ensures both videos are overlayed */
+  /* Video container - ensures both videos are overlaid */
   .video-container {
 	position: fixed; /* ✅ Keeps videos in place */
 	top: 0;
