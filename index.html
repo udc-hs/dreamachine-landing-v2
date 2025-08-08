@@ -1,132 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dreamachine</title>
-  <style>
-    /* Ensure fullscreen layout */
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
+<!-- Loader overlay for dreamachine-landing-v2 (GSAP + Logo) -->
+<div id="loader-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:black;z-index:1000;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+  <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Dreamachine logo" style="width:40vw;max-width:500px;height:auto;margin-bottom:2rem;">
+  <div id="loader-number" style="font-size:6rem;color:#fff;font-weight:bold;text-shadow:2px 2px 8px #000;">0</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+<script>
+  // Loader logic
+  let loaderCounter = { value: 0 };
+  let loaderDuration = 5; // seconds
+
+  // Animate number from 0 to 100
+  gsap.to(loaderCounter, {
+    value: 100,
+    duration: loaderDuration,
+    ease: "power2.out",
+    onUpdate: () => {
+      document.getElementById('loader-number').textContent = Math.round(loaderCounter.value);
     }
+  });
 
-    /* Common styles for both videos */
-    .video-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      pointer-events: none;
+  // Wait for both videos and loader animation
+  let videosLoaded = 0;
+  function tryReveal() {
+    if (videosLoaded === 2 && loaderCounter.value >= 100) {
+      gsap.to("#loader-overlay", {opacity:0, duration:1, onComplete:()=>{
+        document.getElementById("loader-overlay").style.display = "none";
+        startVideos();
+      }});
     }
+  }
 
-    /* The top video has a circular reveal effect with feathered edges */
-    .top-video {
-      position: absolute;
-      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-      mask-image: radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-      transition: mask-image 0.05s ease-out, -webkit-mask-image 0.05s ease-out;
-    }
-
-    /* Clickable Logo */
-    .logo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80vw;  /* Responsive: 80% of viewport width */
-      max-width: 1000px;  /* Prevents the logo from becoming too large */
-      height: auto;
-      cursor: pointer;
-      z-index: 10; /* Ensures it's above videos */
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Bottom Video -->
-  <video id="bottomVideo" class="video-container" muted playsinline>
-    <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <!-- Top Video (initially covering the bottom one) -->
-  <video id="topVideo" class="video-container top-video" muted playsinline>
-    <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <!-- Clickable Logo -->
-  <a href="mailto:hello@thedreamachine.com?subject=Portfolio%20Request&body=Hello,%20I%20would%20like%20to%20know%20more%20about...">
-    <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Logo" class="logo">
-  </a>
-
-  <script>
+  document.addEventListener("DOMContentLoaded", function() {
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
+    if (topVideo && bottomVideo) {
+      topVideo.addEventListener("canplaythrough", function() {
+        videosLoaded++;
+        tryReveal();
+      });
+      bottomVideo.addEventListener("canplaythrough", function() {
+        videosLoaded++;
+        tryReveal();
+      });
+    }
+    gsap.delayedCall(loaderDuration, tryReveal);
+  });
 
-    let revealRadius = 50; // Size of the fully revealed area (hard edge)
-    let featherRadius = 300; // Additional soft feathered edge
-
-    // Ensure both videos start at the exact same time
-    function syncVideos() {
+  function startVideos() {
+    const topVideo = document.getElementById("topVideo");
+    const bottomVideo = document.getElementById("bottomVideo");
+    if (topVideo && bottomVideo) {
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
-
-      // Play both videos simultaneously
       Promise.all([topVideo.play(), bottomVideo.play()])
-        .then(() => {
-          console.log("Both videos started in sync");
-        })
-        .catch(error => {
-          console.error("Error playing videos:", error);
+        .then(()=>{
+          topVideo.classList.add("loaded");
+          bottomVideo.classList.add("loaded");
         });
     }
-
-    // Restart videos in sync when they end
-    function restartVideos() {
-      topVideo.currentTime = 0;
-      bottomVideo.currentTime = 0;
-      syncVideos();
-    }
-
-    // Sync playback speeds (prevents drift over time)
-    function matchPlaybackRates() {
-      bottomVideo.playbackRate = topVideo.playbackRate;
-    }
-
-    // Start videos once metadata is loaded
-    topVideo.addEventListener("loadedmetadata", syncVideos);
-    bottomVideo.addEventListener("loadedmetadata", syncVideos);
-
-    // Sync playback rates continuously
-    topVideo.addEventListener("ratechange", matchPlaybackRates);
-    bottomVideo.addEventListener("ratechange", matchPlaybackRates);
-
-    // Ensure both videos restart together
-    topVideo.addEventListener("ended", restartVideos);
-    bottomVideo.addEventListener("ended", restartVideos);
-
-    // Mouse movement effect for reveal with a hard center and feathered edges
-    document.addEventListener("mousemove", (event) => {
-      const mouseX = event.clientX || 0;
-      const mouseY = event.clientY || 0;
-
-      // Adjust radial gradient so the center is fully revealed with only feathered edges
-      const maskStyle = `radial-gradient(circle ${revealRadius + featherRadius}px at ${mouseX}px ${mouseY}px, 
-                          rgba(0,0,0,1) ${revealRadius}px, 
-                          rgba(0,0,0,0) ${revealRadius + featherRadius}px)`;
-      
-      topVideo.style.maskImage = maskStyle;
-      topVideo.style.webkitMaskImage = maskStyle;
-    });
-
-  </script>
-
-</body>
-</html>
+  }
+</script>
