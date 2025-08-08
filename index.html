@@ -45,9 +45,45 @@
       cursor: pointer;
       z-index: 10; /* Ensures it's above videos */
     }
+
+    /* Loader Overlay */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000; /* Above everything else */
+    }
+
+    .loader-logo {
+      width: 60vw;
+      max-width: 600px;
+      height: auto;
+      margin-bottom: 60px;
+    }
+
+    .loader-number {
+      font-family: Arial, sans-serif;
+      font-size: 80px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Loader Overlay -->
+  <div id="loaderOverlay" class="loader-overlay">
+    <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Dreamachine Logo" class="loader-logo">
+    <div id="loaderNumber" class="loader-number">0</div>
+  </div>
 
   <!-- Bottom Video -->
   <video id="bottomVideo" class="video-container" muted playsinline>
@@ -69,9 +105,75 @@
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
+    const loaderOverlay = document.getElementById("loaderOverlay");
+    const loaderNumber = document.getElementById("loaderNumber");
 
     let revealRadius = 50; // Size of the fully revealed area (hard edge)
     let featherRadius = 300; // Additional soft feathered edge
+
+    // Track loading states
+    let topVideoReady = false;
+    let bottomVideoReady = false;
+    let loaderAnimationComplete = false;
+
+    // Start the loader number animation
+    function startLoaderAnimation() {
+      const startTime = Date.now();
+      const duration = 3000; // 3 seconds
+      
+      function updateNumber() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation (ease-out)
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        const currentNumber = Math.floor(easedProgress * 100);
+        
+        loaderNumber.textContent = currentNumber;
+        
+        if (progress < 1) {
+          requestAnimationFrame(updateNumber);
+        } else {
+          loaderAnimationComplete = true;
+          checkReadyToStart();
+        }
+      }
+      
+      requestAnimationFrame(updateNumber);
+    }
+
+    // Check if we're ready to start videos (both videos buffered and animation complete)
+    function checkReadyToStart() {
+      if (topVideoReady && bottomVideoReady && loaderAnimationComplete) {
+        hideLoaderAndStartVideos();
+      }
+    }
+
+    // Hide loader and start videos in sync
+    function hideLoaderAndStartVideos() {
+      // Fade out the loader overlay
+      const startTime = Date.now();
+      const duration = 1000; // 1 second fade
+      
+      function fadeOut() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const opacity = 1 - progress;
+        
+        loaderOverlay.style.opacity = opacity;
+        
+        if (progress < 1) {
+          requestAnimationFrame(fadeOut);
+        } else {
+          loaderOverlay.style.display = 'none';
+        }
+      }
+      
+      requestAnimationFrame(fadeOut);
+
+      // Start videos in sync
+      syncVideos();
+    }
 
     // Ensure both videos start at the exact same time
     function syncVideos() {
@@ -100,9 +202,34 @@
       bottomVideo.playbackRate = topVideo.playbackRate;
     }
 
-    // Start videos once metadata is loaded
-    topVideo.addEventListener("loadedmetadata", syncVideos);
-    bottomVideo.addEventListener("loadedmetadata", syncVideos);
+    // Video event listeners for buffering
+    topVideo.addEventListener("canplaythrough", function() {
+      topVideoReady = true;
+      checkReadyToStart();
+    });
+
+    bottomVideo.addEventListener("canplaythrough", function() {
+      bottomVideoReady = true;
+      checkReadyToStart();
+    });
+
+    // Handle video loading errors - proceed anyway after timeout
+    topVideo.addEventListener("error", function() {
+      topVideoReady = true; // Consider it "ready" even if failed
+      checkReadyToStart();
+    });
+
+    bottomVideo.addEventListener("error", function() {
+      bottomVideoReady = true; // Consider it "ready" even if failed
+      checkReadyToStart();
+    });
+
+    // Fallback timeout - if videos don't load after 10 seconds, proceed anyway
+    setTimeout(function() {
+      topVideoReady = true;
+      bottomVideoReady = true;
+      checkReadyToStart();
+    }, 10000);
 
     // Sync playback rates continuously
     topVideo.addEventListener("ratechange", matchPlaybackRates);
@@ -125,6 +252,9 @@
       topVideo.style.maskImage = maskStyle;
       topVideo.style.webkitMaskImage = maskStyle;
     });
+
+    // Start the loader animation when the page loads
+    window.addEventListener('load', startLoaderAnimation);
 
   </script>
 
