@@ -46,34 +46,40 @@
       z-index: 10; /* Ensures it's above videos */
     }
 
-    /* Fullscreen overlay prompting user interaction */
-    .overlay {
+    /* Loading counter at bottom right */
+    .loading-counter {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.9);
+      bottom: 20px;
+      right: 20px;
       color: #fff;
-      font-size: 2rem;
+      font-family: Arial, sans-serif;
+      font-size: 1.2rem;
       z-index: 20;
-      cursor: pointer;
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    /* Video fade-in effect */
+    .video-container {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .video-container.loaded {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
   <!-- Bottom Video -->
-  <video id="bottomVideo" class="video-container" muted playsinline>
+  <video id="bottomVideo" class="video-container" muted playsinline loop preload="metadata">
     <source src="https://freight.cargo.site/m/L2190992256300586244793696638090/AI-BLACK.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
   <!-- Top Video (initially covering the bottom one) -->
-  <video id="topVideo" class="video-container top-video" muted playsinline>
+  <video id="topVideo" class="video-container top-video" muted playsinline loop preload="metadata">
     <source src="https://freight.cargo.site/m/A2191010521805399430148968010890/inverted-depth.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -83,18 +89,52 @@
     <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Logo" class="logo">
   </a>
 
-  <!-- Overlay to start playback -->
-  <div id="overlay" class="overlay">Tap to Start</div>
+  <!-- Loading counter -->
+  <div id="loadingCounter" class="loading-counter">Loading: 0%</div>
 
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
+    const loadingCounter = document.getElementById("loadingCounter");
 
     let revealRadius = 50; // Size of the fully revealed area (hard edge)
     let featherRadius = 300; // Additional soft feathered edge
+    
+    // Loading progress tracking
+    let topVideoLoaded = false;
+    let bottomVideoLoaded = false;
+    let loadingProgress = 0;
+    let videosStarted = false;
 
-    // Ensure both videos start at the exact same time
-    function syncVideos() {
+    // Update loading counter display
+    function updateLoadingCounter(progress) {
+      loadingProgress = progress;
+      loadingCounter.textContent = `Loading: ${Math.round(progress)}%`;
+      
+      // Hide counter when loading is complete
+      if (progress >= 100) {
+        setTimeout(() => {
+          loadingCounter.style.opacity = '0';
+        }, 500);
+      }
+    }
+
+    // Check if both videos are ready and start playback
+    function checkVideosReady() {
+      if (topVideoLoaded && bottomVideoLoaded && !videosStarted) {
+        videosStarted = true;
+        updateLoadingCounter(100);
+        
+        // Small delay to ensure everything is ready
+        setTimeout(() => {
+          startSyncedPlayback();
+        }, 100);
+      }
+    }
+
+    // Start synchronized video playback with fade-in
+    function startSyncedPlayback() {
+      // Reset both videos to start
       topVideo.currentTime = 0;
       bottomVideo.currentTime = 0;
 
@@ -102,29 +142,90 @@
       Promise.all([topVideo.play(), bottomVideo.play()])
         .then(() => {
           console.log("Both videos started in sync");
+          
+          // Fade in videos
+          topVideo.classList.add('loaded');
+          bottomVideo.classList.add('loaded');
         })
         .catch(error => {
           console.error("Error playing videos:", error);
+          // Fallback: still show videos even if autoplay fails
+          topVideo.classList.add('loaded');
+          bottomVideo.classList.add('loaded');
         });
     }
 
-    // Restart videos in sync when they end
+    // Video loading event handlers
+    function onVideoCanPlay(video, isTop) {
+      if (isTop) {
+        topVideoLoaded = true;
+      } else {
+        bottomVideoLoaded = true;
+      }
+      
+      // Update progress (50% per video)
+      const progress = (topVideoLoaded ? 50 : 0) + (bottomVideoLoaded ? 50 : 0);
+      updateLoadingCounter(progress);
+      
+      checkVideosReady();
+    }
+
+    // Enhanced loading progress tracking
+    function onVideoProgress(video, isTop) {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const duration = video.duration;
+        if (duration > 0) {
+          const progressPercent = (bufferedEnd / duration) * 50; // 50% per video
+          const currentProgress = isTop ? 
+            progressPercent + (bottomVideoLoaded ? 50 : (bottomVideo.buffered.length > 0 ? (bottomVideo.buffered.end(bottomVideo.buffered.length - 1) / bottomVideo.duration) * 50 : 0)) :
+            progressPercent + (topVideoLoaded ? 50 : (topVideo.buffered.length > 0 ? (topVideo.buffered.end(topVideo.buffered.length - 1) / topVideo.duration) * 50 : 0));
+          
+          updateLoadingCounter(Math.min(currentProgress, 100));
+        }
+      }
+    }
+
+    // Set up video loading listeners
+    topVideo.addEventListener("canplay", () => onVideoCanPlay(topVideo, true));
+    bottomVideo.addEventListener("canplay", () => onVideoCanPlay(bottomVideo, false));
+    
+    topVideo.addEventListener("progress", () => onVideoProgress(topVideo, true));
+    bottomVideo.addEventListener("progress", () => onVideoProgress(bottomVideo, false));
+
+    // Fallback loading detection
+    topVideo.addEventListener("loadeddata", () => {
+      if (!topVideoLoaded) {
+        onVideoCanPlay(topVideo, true);
+      }
+    });
+    
+    bottomVideo.addEventListener("loadeddata", () => {
+      if (!bottomVideoLoaded) {
+        onVideoCanPlay(bottomVideo, false);
+      }
+    });
+
+    // Restart videos in sync when they end (backup to loop attribute)
     function restartVideos() {
-      topVideo.currentTime = 0;
-      bottomVideo.currentTime = 0;
-      syncVideos();
+      if (videosStarted) {
+        topVideo.currentTime = 0;
+        bottomVideo.currentTime = 0;
+      }
     }
 
     // Sync playback speeds (prevents drift over time)
     function matchPlaybackRates() {
-      bottomVideo.playbackRate = topVideo.playbackRate;
+      if (videosStarted) {
+        bottomVideo.playbackRate = topVideo.playbackRate;
+      }
     }
 
     // Sync playback rates continuously
     topVideo.addEventListener("ratechange", matchPlaybackRates);
     bottomVideo.addEventListener("ratechange", matchPlaybackRates);
 
-    // Ensure both videos restart together
+    // Ensure both videos restart together (backup to loop)
     topVideo.addEventListener("ended", restartVideos);
     bottomVideo.addEventListener("ended", restartVideos);
 
@@ -150,14 +251,19 @@
       }
     });
 
-    // Start videos after user interaction
-    const overlay = document.getElementById("overlay");
-    function startPlayback() {
-      overlay.style.display = "none";
-      syncVideos();
-    }
-    overlay.addEventListener("click", startPlayback);
-    overlay.addEventListener("touchstart", startPlayback);
+    // Fallback timer in case loading events don't fire properly
+    setTimeout(() => {
+      if (!videosStarted) {
+        console.log("Fallback: Starting videos after timeout");
+        // Force mark as loaded and start
+        topVideoLoaded = true;
+        bottomVideoLoaded = true;
+        checkVideosReady();
+      }
+    }, 10000); // 10 second fallback
+
+    // Initialize loading counter
+    updateLoadingCounter(0);
 
   </script>
 
