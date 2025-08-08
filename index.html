@@ -23,6 +23,11 @@
   <meta name="twitter:description" content="Explore Dreamachine's interactive visuals that blend art and technology.">
   <meta name="twitter:image" content="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png">
 
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -78,17 +83,34 @@
       z-index: 10; /* Ensures it's above videos */
     }
 
-    /* Loading counter at bottom right */
-    .loading-counter {
+    /* Full-screen preloader */
+    #preloader {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      font-size: 1.2rem;
-      z-index: 20;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
       opacity: 1;
-      transition: opacity 0.5s ease-in-out;
+      transition: opacity 0.8s ease-in-out;
+    }
+
+    #preloader.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #preloaderPercent {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      font-size: clamp(4rem, 12vw, 8rem);
+      color: #ffffff;
+      text-align: center;
+      letter-spacing: -0.02em;
     }
 
     /* Video fade-in effect */
@@ -103,6 +125,11 @@
   </style>
 </head>
 <body>
+
+  <!-- Full-screen preloader -->
+  <div id="preloader">
+    <span id="preloaderPercent">0%</span>
+  </div>
 
   <!-- Bottom Video -->
   <video id="bottomVideo" class="video-container" muted playsinline loop preload="metadata">
@@ -121,13 +148,11 @@
     <img src="https://freight.cargo.site/t/original/i/R2192464133004486997848030041226/DM_Logo_for_web_V01-no-bottom-bit.png" alt="Dreamachine logo" class="logo">
   </a>
 
-  <!-- Loading counter -->
-  <div id="loadingCounter" class="loading-counter">Loading: 0%</div>
-
   <script>
     const topVideo = document.getElementById("topVideo");
     const bottomVideo = document.getElementById("bottomVideo");
-    const loadingCounter = document.getElementById("loadingCounter");
+    const preloader = document.getElementById("preloader");
+    const preloaderPercent = document.getElementById("preloaderPercent");
 
     let revealRadius = 50; // Size of the fully revealed area (hard edge)
     let featherRadius = 300; // Additional soft feathered edge
@@ -135,33 +160,54 @@
     // Loading progress tracking
     let topVideoLoaded = false;
     let bottomVideoLoaded = false;
-    let loadingProgress = 0;
     let videosStarted = false;
+    let visualCounterComplete = false;
+    let visualCounterValue = 0;
 
-    // Update loading counter display
-    function updateLoadingCounter(progress) {
-      loadingProgress = progress;
-      loadingCounter.textContent = `Loading: ${Math.round(progress)}%`;
+    // Visual counter animation (independent of actual loading progress)
+    function animateVisualCounter() {
+      const duration = 1800; // 1.8 seconds
+      const startTime = performance.now();
       
-      // Hide counter when loading is complete
-      if (progress >= 100) {
+      function updateCounter(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        visualCounterValue = Math.floor(progress * 100);
+        preloaderPercent.textContent = `${visualCounterValue}%`;
+        
+        if (progress < 1) {
+          requestAnimationFrame(updateCounter);
+        } else {
+          visualCounterComplete = true;
+          checkReadyToStart();
+        }
+      }
+      
+      requestAnimationFrame(updateCounter);
+    }
+
+    // Check if both visual counter and videos are ready, then start
+    function checkReadyToStart() {
+      if (visualCounterComplete && topVideoLoaded && bottomVideoLoaded && !videosStarted) {
+        videosStarted = true;
+        
+        // Small delay to let the 100% display briefly
         setTimeout(() => {
-          loadingCounter.style.opacity = '0';
-        }, 500);
+          startSyncedPlayback();
+          fadeOutPreloader();
+        }, 200);
       }
     }
 
-    // Check if both videos are ready and start playback
-    function checkVideosReady() {
-      if (topVideoLoaded && bottomVideoLoaded && !videosStarted) {
-        videosStarted = true;
-        updateLoadingCounter(100);
-        
-        // Small delay to ensure everything is ready
-        setTimeout(() => {
-          startSyncedPlayback();
-        }, 100);
-      }
+    // Fade out the preloader
+    function fadeOutPreloader() {
+      preloader.classList.add('fade-out');
+      
+      // Remove from DOM after transition completes
+      setTimeout(() => {
+        preloader.style.display = 'none';
+      }, 800);
     }
 
     // Start synchronized video playback with fade-in
@@ -195,36 +241,13 @@
         bottomVideoLoaded = true;
       }
       
-      // Update progress (50% per video)
-      const progress = (topVideoLoaded ? 50 : 0) + (bottomVideoLoaded ? 50 : 0);
-      updateLoadingCounter(progress);
-      
-      checkVideosReady();
-    }
-
-    // Enhanced loading progress tracking
-    function onVideoProgress(video, isTop) {
-      if (video.buffered.length > 0) {
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const duration = video.duration;
-        if (duration > 0) {
-          const progressPercent = (bufferedEnd / duration) * 50; // 50% per video
-          const currentProgress = isTop ? 
-            progressPercent + (bottomVideoLoaded ? 50 : (bottomVideo.buffered.length > 0 ? (bottomVideo.buffered.end(bottomVideo.buffered.length - 1) / bottomVideo.duration) * 50 : 0)) :
-            progressPercent + (topVideoLoaded ? 50 : (topVideo.buffered.length > 0 ? (topVideo.buffered.end(topVideo.buffered.length - 1) / topVideo.duration) * 50 : 0));
-          
-          updateLoadingCounter(Math.min(currentProgress, 100));
-        }
-      }
+      checkReadyToStart();
     }
 
     // Set up video loading listeners
     topVideo.addEventListener("canplay", () => onVideoCanPlay(topVideo, true));
     bottomVideo.addEventListener("canplay", () => onVideoCanPlay(bottomVideo, false));
     
-    topVideo.addEventListener("progress", () => onVideoProgress(topVideo, true));
-    bottomVideo.addEventListener("progress", () => onVideoProgress(bottomVideo, false));
-
     // Fallback loading detection
     topVideo.addEventListener("loadeddata", () => {
       if (!topVideoLoaded) {
@@ -286,15 +309,22 @@
     setTimeout(() => {
       if (!videosStarted) {
         console.log("Fallback: Starting videos after timeout");
-        // Force mark as loaded and start
+        // Force mark as loaded and start if visual counter is done
         topVideoLoaded = true;
         bottomVideoLoaded = true;
-        checkVideosReady();
+        checkReadyToStart();
+        
+        // If visual counter isn't done yet, force complete it
+        if (!visualCounterComplete) {
+          visualCounterComplete = true;
+          preloaderPercent.textContent = "100%";
+          checkReadyToStart();
+        }
       }
     }, 10000); // 10 second fallback
 
-    // Initialize loading counter
-    updateLoadingCounter(0);
+    // Start the visual counter animation
+    animateVisualCounter();
 
   </script>
 
